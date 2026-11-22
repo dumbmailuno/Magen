@@ -1,0 +1,315 @@
+{
+  "base_url": "https://legacy.example.com/",
+  "http": {
+    "base-get": {
+      "body_bytes": 11,
+      "body_excerpt": "{\"ok\":true}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://legacy.example.com/",
+      "headers": [
+        [
+          "server",
+          "nginx/1.18.0"
+        ],
+        [
+          "x-powered-by",
+          "Express"
+        ],
+        [
+          "content-type",
+          "application/json"
+        ],
+        [
+          "access-control-allow-origin",
+          "https://magen-cors-probe.invalid"
+        ],
+        [
+          "access-control-allow-credentials",
+          "true"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "base-get",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 200,
+      "url": "https://legacy.example.com/"
+    },
+    "base-options": {
+      "body_bytes": 0,
+      "body_excerpt": "",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://legacy.example.com/",
+      "headers": [
+        [
+          "allow",
+          "GET, POST, OPTIONS, TRACE"
+        ]
+      ],
+      "method": "OPTIONS",
+      "probe_id": "base-options",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 204,
+      "url": "https://legacy.example.com/"
+    },
+    "not-found": {
+      "body_bytes": 96,
+      "body_excerpt": "Traceback (most recent call last):\n  File \"/srv/app/views.py\", line 42, in handler\nKeyError: 'x'",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://legacy.example.com/magen-probe-not-found-7f3a",
+      "headers": [
+        [
+          "content-type",
+          "text/plain"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "not-found",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 500,
+      "url": "https://legacy.example.com/magen-probe-not-found-7f3a"
+    },
+    "path-actuator": {
+      "body_bytes": 22,
+      "body_excerpt": "{\"detail\":\"Not Found\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://legacy.example.com/actuator",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-actuator",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://legacy.example.com/actuator"
+    },
+    "path-env": {
+      "body_bytes": 22,
+      "body_excerpt": "",
+      "body_withheld": true,
+      "error": null,
+      "final_url": "https://legacy.example.com/.env",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-env",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://legacy.example.com/.env"
+    },
+    "path-git-head": {
+      "body_bytes": 22,
+      "body_excerpt": "{\"detail\":\"Not Found\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://legacy.example.com/.git/HEAD",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-git-head",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://legacy.example.com/.git/HEAD"
+    },
+    "path-nginx-status": {
+      "body_bytes": 22,
+      "body_excerpt": "{\"detail\":\"Not Found\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://legacy.example.com/nginx_status",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-nginx-status",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://legacy.example.com/nginx_status"
+    },
+    "path-phpinfo": {
+      "body_bytes": 22,
+      "body_excerpt": "{\"detail\":\"Not Found\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://legacy.example.com/phpinfo.php",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-phpinfo",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://legacy.example.com/phpinfo.php"
+    },
+    "path-server-status": {
+      "body_bytes": 22,
+      "body_excerpt": "{\"detail\":\"Not Found\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://legacy.example.com/server-status",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-server-status",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://legacy.example.com/server-status"
+    },
+    "plain-http": {
+      "body_bytes": 11,
+      "body_excerpt": "{\"ok\":true}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "http://legacy.example.com/",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "plain-http",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 200,
+      "url": "http://legacy.example.com/"
+    }
+  },
+  "skipped": [],
+  "target_host": "legacy.example.com",
+  "tls": {
+    "error": null,
+    "host": "legacy.example.com",
+    "legacy_protocols": {
+      "TLSv1": true,
+      "TLSv1.1": true
+    },
+    "port": 443,
+    "protocol": "TLSv1.2",
+    "verified": false,
+    "verify_error": "certificate has expired"
+  }
+}

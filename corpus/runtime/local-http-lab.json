@@ -1,0 +1,264 @@
+{
+  "base_url": "http://localhost:5000/",
+  "http": {
+    "base-get": {
+      "body_bytes": 38,
+      "body_excerpt": "{\"message\":\"VAmPI the Vulnerable API\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "http://localhost:5000/",
+      "headers": [
+        [
+          "server",
+          "Werkzeug/2.2.2 Python/3.11.4"
+        ],
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "base-get",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 200,
+      "url": "http://localhost:5000/"
+    },
+    "base-options": {
+      "body_bytes": 0,
+      "body_excerpt": "",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "http://localhost:5000/",
+      "headers": [
+        [
+          "allow",
+          "HEAD, GET, OPTIONS"
+        ]
+      ],
+      "method": "OPTIONS",
+      "probe_id": "base-options",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 200,
+      "url": "http://localhost:5000/"
+    },
+    "not-found": {
+      "body_bytes": 22,
+      "body_excerpt": "{\"detail\":\"Not Found\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "http://localhost:5000/magen-probe-not-found-7f3a",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "not-found",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "http://localhost:5000/magen-probe-not-found-7f3a"
+    },
+    "path-actuator": {
+      "body_bytes": 22,
+      "body_excerpt": "{\"detail\":\"Not Found\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "http://localhost:5000/actuator",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-actuator",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "http://localhost:5000/actuator"
+    },
+    "path-env": {
+      "body_bytes": 22,
+      "body_excerpt": "",
+      "body_withheld": true,
+      "error": null,
+      "final_url": "http://localhost:5000/.env",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-env",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "http://localhost:5000/.env"
+    },
+    "path-git-head": {
+      "body_bytes": 22,
+      "body_excerpt": "{\"detail\":\"Not Found\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "http://localhost:5000/.git/HEAD",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-git-head",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "http://localhost:5000/.git/HEAD"
+    },
+    "path-nginx-status": {
+      "body_bytes": 22,
+      "body_excerpt": "{\"detail\":\"Not Found\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "http://localhost:5000/nginx_status",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-nginx-status",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "http://localhost:5000/nginx_status"
+    },
+    "path-phpinfo": {
+      "body_bytes": 22,
+      "body_excerpt": "{\"detail\":\"Not Found\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "http://localhost:5000/phpinfo.php",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-phpinfo",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "http://localhost:5000/phpinfo.php"
+    },
+    "path-server-status": {
+      "body_bytes": 22,
+      "body_excerpt": "{\"detail\":\"Not Found\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "http://localhost:5000/server-status",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-server-status",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "http://localhost:5000/server-status"
+    }
+  },
+  "skipped": [],
+  "target_host": "localhost",
+  "tls": null
+}

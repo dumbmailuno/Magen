@@ -119,3 +119,39 @@ files:
       - { rule_id: NGX-TLS-003, pointer: /server/0, status: inconclusive }
       - { rule_id: NGX-HDR-002, pointer: /server/0, status: inconclusive }
       - { rule_id: NGX-RL-001, pointer: /server/0, status: inconclusive }
+
+  # ---- Runtime (corpus v1, 2026-11-22) -----------------------------------------------------
+  # Recorded, redacted probe observations replayed through the runtime rules (no network).
+  # Pointers are probe ids. Runtime findings are directly observed → status confirmed.
+
+  - file: runtime/hardened-api.json
+    kind: clean
+    expected: []
+
+  - file: runtime/legacy-server.json
+    kind: vulnerable
+    expected:
+      - { rule_id: API-RT-001, pointer: "probe:plain-http", status: confirmed }
+      - { rule_id: API-RT-002, pointer: "probe:tls-legacy", status: confirmed }
+      - { rule_id: API-RT-003, pointer: "probe:tls-verify", status: confirmed }
+      - { rule_id: API-RT-004, pointer: "probe:base-get", status: confirmed }
+      - { rule_id: API-RT-005, pointer: "probe:base-get", status: confirmed }
+      - { rule_id: API-RT-006, pointer: "probe:base-get", status: confirmed }
+      - { rule_id: API-RT-007, pointer: "probe:base-get", status: confirmed }
+      - { rule_id: API-RT-008, pointer: "probe:not-found", status: confirmed }
+      - { rule_id: API-RT-011, pointer: "probe:base-options", status: confirmed }
+
+  - file: runtime/exposed-files.json
+    kind: vulnerable
+    expected:
+      - { rule_id: API-RT-009, pointer: "probe:path-git-head", status: confirmed }
+      - { rule_id: API-RT-009, pointer: "probe:path-env", status: confirmed }
+      - { rule_id: API-RT-010, pointer: "probe:path-nginx-status", status: confirmed }
+      - { rule_id: API-RT-010, pointer: "probe:path-actuator", status: confirmed }
+
+  - file: runtime/local-http-lab.json
+    kind: tricky
+    expected:
+      - { rule_id: API-RT-001, pointer: "probe:base-get", status: confirmed }
+      - { rule_id: API-RT-005, pointer: "probe:base-get", status: confirmed }
+      - { rule_id: API-RT-006, pointer: "probe:base-get", status: confirmed }

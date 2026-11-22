@@ -1,0 +1,319 @@
+{
+  "base_url": "https://api.example.com/v1/",
+  "http": {
+    "base-get": {
+      "body_bytes": 15,
+      "body_excerpt": "{\"status\":\"ok\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://api.example.com/v1/",
+      "headers": [
+        [
+          "server",
+          "nginx"
+        ],
+        [
+          "content-type",
+          "application/json"
+        ],
+        [
+          "strict-transport-security",
+          "max-age=31536000; includeSubDomains"
+        ],
+        [
+          "x-content-type-options",
+          "nosniff"
+        ],
+        [
+          "x-frame-options",
+          "DENY"
+        ],
+        [
+          "date",
+          "Sun, 22 Nov 2026 10:00:00 GMT"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "base-get",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 200,
+      "url": "https://api.example.com/v1/"
+    },
+    "base-options": {
+      "body_bytes": 0,
+      "body_excerpt": "",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://api.example.com/v1/",
+      "headers": [
+        [
+          "allow",
+          "GET, HEAD, OPTIONS"
+        ]
+      ],
+      "method": "OPTIONS",
+      "probe_id": "base-options",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 204,
+      "url": "https://api.example.com/v1/"
+    },
+    "not-found": {
+      "body_bytes": 22,
+      "body_excerpt": "{\"detail\":\"Not Found\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://api.example.com/magen-probe-not-found-7f3a",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "not-found",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://api.example.com/magen-probe-not-found-7f3a"
+    },
+    "path-actuator": {
+      "body_bytes": 22,
+      "body_excerpt": "{\"detail\":\"Not Found\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://api.example.com/actuator",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-actuator",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://api.example.com/actuator"
+    },
+    "path-env": {
+      "body_bytes": 22,
+      "body_excerpt": "",
+      "body_withheld": true,
+      "error": null,
+      "final_url": "https://api.example.com/.env",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-env",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://api.example.com/.env"
+    },
+    "path-git-head": {
+      "body_bytes": 22,
+      "body_excerpt": "{\"detail\":\"Not Found\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://api.example.com/.git/HEAD",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-git-head",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://api.example.com/.git/HEAD"
+    },
+    "path-nginx-status": {
+      "body_bytes": 22,
+      "body_excerpt": "{\"detail\":\"Not Found\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://api.example.com/nginx_status",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-nginx-status",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://api.example.com/nginx_status"
+    },
+    "path-phpinfo": {
+      "body_bytes": 22,
+      "body_excerpt": "{\"detail\":\"Not Found\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://api.example.com/phpinfo.php",
+      "headers": [
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-phpinfo",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://api.example.com/phpinfo.php"
+    },
+    "path-server-status": {
+      "body_bytes": 52,
+      "body_excerpt": "<!doctype html><title>App</title><div id=root></div>",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://api.example.com/server-status",
+      "headers": [
+        [
+          "content-type",
+          "text/html"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-server-status",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 200,
+      "url": "https://api.example.com/server-status"
+    },
+    "plain-http": {
+      "body_bytes": 0,
+      "body_excerpt": "",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "http://api.example.com/",
+      "headers": [
+        [
+          "location",
+          "https://api.example.com/"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "plain-http",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 301,
+      "url": "http://api.example.com/"
+    }
+  },
+  "skipped": [],
+  "target_host": "api.example.com",
+  "tls": {
+    "error": null,
+    "host": "api.example.com",
+    "legacy_protocols": {
+      "TLSv1": false,
+      "TLSv1.1": null
+    },
+    "port": 443,
+    "protocol": "TLSv1.3",
+    "verified": true,
+    "verify_error": null
+  }
+}
