@@ -58,4 +58,5 @@ jobs:
       - run: npm ci
         env:
           ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
-      - run: npm run build:electron
+      - name: Build + test (app:// path-traversal guard)
+        run: npm run test:electron

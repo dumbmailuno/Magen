@@ -39,7 +39,8 @@ Status column: ✅ implemented · 🟡 planned (roadmap week).
 | Data sent to cloud AI (I) | B4 | `ollama_url` must be loopback (settings validator); cloud off by default, requires explicit opt-in with preview | ✅ / 🟡 |
 | Malicious spec/config exploits parser (T, D) | B2 | Safe YAML loading only; size limits; no `$ref` fetching over network | 🟡 wk 3–4 |
 | Renderer compromise escalates to Node (E) | B5 | `contextIsolation`, `nodeIntegration: false`, `sandbox: true`; preload exposes only URL + token; navigation & `window.open` blocked; all permission requests denied; strict CSP (no remote content) | ✅ |
-| Path traversal via `app://` protocol (I) | B5 | Resolved path must stay inside `frontend/dist`, else 403 | ✅ |
+| Path traversal via `app://` protocol (I) | B5 | `resolveAppPath` (pure, unit-tested incl. encoded `..`, backslashes, NUL, malformed escapes): resolved path must stay inside `frontend/dist`, else 403 | ✅ |
+| Token handed to an unexpected frame (I) | B5 | IPC handler returns config only if the sender frame URL is our own origin | ✅ |
 
 ## Residual risks / limitations
 

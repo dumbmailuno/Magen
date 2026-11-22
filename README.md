@@ -52,6 +52,8 @@ npm run lint && npm test
 cd ..
 npm install
 npm run electron:dev        # Vite + Electron; Electron spawns the backend itself
+npm run electron:start      # production build loaded via app:// with strict CSP
+npm run test:electron       # app:// path-traversal guard tests
 ```
 
 `npm run electron:dev` starts the Vite dev server and Electron. Electron picks a free
@@ -88,6 +90,12 @@ npm run dev                  # http://127.0.0.1:5173/#/dev/components
   uses a lowercase drive letter (`c:\...`, common in VS Code terminals), so Vitest loads
   itself twice. `cd C:\Users\...` (uppercase) and re-run.
 - **Electron: "backend executable not found"** — run `uv sync` in `backend/` first.
+- **Electron: `Cannot read properties of undefined (reading 'registerSchemesAsPrivileged')`**
+  — `ELECTRON_RUN_AS_NODE=1` is set (VS Code exports it to its terminals). The npm scripts
+  launch through `scripts/electron.mjs`, which strips it; don't run `electron .` directly.
+- **Fresh clone: Electron binary missing** — npm 11 blocks install scripts unless approved;
+  `package.json` `allowScripts` approves `electron`. If you bump Electron, re-run
+  `npm approve-scripts electron`.
 
 ## Safety
 

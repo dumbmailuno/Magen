@@ -1,0 +1,26 @@
+{
+  "name": "magen",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Magen — AI-assisted API security misconfiguration detection & remediation",
+  "main": "electron/dist/main.js",
+  "scripts": {
+    "build:electron": "tsc -p electron",
+    "electron:dev": "npm run build:electron && concurrently -k -n vite,electron \"npm --prefix frontend run dev\" \"wait-on -t 60000 http-get://127.0.0.1:5173 && node scripts/electron.mjs --dev\"",
+    "electron:start": "npm --prefix frontend run build && npm run build:electron && node scripts/electron.mjs",
+    "electron:build": "npm --prefix frontend run build && npm run build:electron && electron-builder",
+    "test:electron": "npm run build:electron && node --test \"electron/dist/**/*.test.js\""
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "concurrently": "^10.0.7",
+    "electron": "^33.4.11",
+    "electron-builder": "^26.18.0",
+    "typescript": "^7.0.2",
+    "wait-on": "^9.5.1"
+  },
+  "allowScripts": {
+    "electron@33.4.11": true,
+    "electron-winstaller@5.4.0": true
+  }
+}
