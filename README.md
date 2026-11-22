@@ -17,7 +17,7 @@ Final-year academic project — see [`CLAUDE.md`](CLAUDE.md) for the full engine
 Roadmap week 1–2 (scaffold): finding schema, SQLite + migrations, FastAPI skeleton with
 session-token auth, Electron shell, design tokens, base components, `/dev/components`, CI.
 Roadmap week 3–4: OpenAPI parser + 10 rules (`API-OAS-001`…`010`, see
-[`docs/rules.md`](docs/rules.md)) and labelled corpus v1. Nginx rules start in week 5.
+[`docs/rules.md`](docs/rules.md)) and labelled corpus v1. Week 5–6: Nginx parser + 11 rules (`NGX-*`) and the findings UI.
 
 ## Layout
 

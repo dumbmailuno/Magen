@@ -37,7 +37,7 @@ Status column: ✅ implemented · 🟡 planned (roadmap week).
 | LLM "decides" a vulnerability (integrity of results) (T) | B4 | Architecture: findings only from pure rules; AI output stored only in `ai_explanation`/`ai_fix`, always labelled | ✅ by design |
 | Malicious generated fix (T) | B4 | Fixes validated (re-parse / `nginx -t`), shown as diff, never written to user files (no "Apply" button) | 🟡 wk 9–10 |
 | Data sent to cloud AI (I) | B4 | `ollama_url` must be loopback (settings validator); cloud off by default, requires explicit opt-in with preview | ✅ / 🟡 |
-| Malicious spec exploits parser (T, D) | B2 | OpenAPI: `yaml.SafeLoader`, non-standard tags rejected, 5 MB cap, depth ≤ 64, node budget ≤ 200k (alias bombs), external `$ref` never fetched, ref cycles bounded; all tested | ✅ OpenAPI / 🟡 Nginx wk 5–6 |
+| Malicious spec exploits parser (T, D) | B2 | OpenAPI: `yaml.SafeLoader`, non-standard tags rejected, 5 MB cap, depth ≤ 64, node budget ≤ 200k (alias bombs), external `$ref` never fetched, ref cycles bounded. Nginx: own text-only parser (no filesystem; `include` never followed), 5 MB / depth 32 / 500k-token caps. All tested | ✅ |
 | Renderer compromise escalates to Node (E) | B5 | `contextIsolation`, `nodeIntegration: false`, `sandbox: true`; preload exposes only URL + token; navigation & `window.open` blocked; all permission requests denied; strict CSP (no remote content) | ✅ |
 | Path traversal via `app://` protocol (I) | B5 | `resolveAppPath` (pure, unit-tested incl. encoded `..`, backslashes, NUL, malformed escapes): resolved path must stay inside `frontend/dist`, else 403 | ✅ |
 | Token handed to an unexpected frame (I) | B5 | IPC handler returns config only if the sender frame URL is our own origin | ✅ |

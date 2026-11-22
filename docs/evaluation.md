@@ -33,6 +33,22 @@ intentionally vulnerable apps (crAPI, VAmPI, OWASP Juice Shop) run locally via D
 
 25 expected findings; every OpenAPI rule has ≥ 1 positive in the corpus.
 
+### Corpus v1 (2026-11-22) — Nginx
+
+| File | Kind | Expected findings | Exercises |
+|---|---|---|---|
+| `clean-tls.conf` | clean | 0 | redirect server, modern TLS, headers, `limit_req`, restricted `stub_status`, denied `.git`, per-location body limit |
+| `legacy-tls.conf` | vulnerable | 3 | TLS-001, TLS-002, TLS-003 |
+| `plaintext.conf` | vulnerable | 2 | TLS-004 incl. implicit port 80; loopback and `location /` redirect negatives |
+| `exposure.conf` | vulnerable | 5 | CFG-001, CFG-002 ×2, CFG-003 ×2; denied/auth/off/health-path negatives |
+| `header-inheritance.conf` | tricky | 3 | `add_header` inheritance drop (TLS-003 + HDR-002), HSTS `max-age=0`; inherit and re-declare negatives |
+| `cors.conf` | vulnerable | 2 | CORS-001 wildcard and reflection with credentials; `map` and `if`-guarded negatives |
+| `site-snippet.conf` | tricky | 4 (all inconclusive) | snippet without `http` + unresolved `include` → `inconclusive` status |
+
+19 expected findings; every Nginx rule has ≥ 1 positive. Corpus v1 total: 16 files, 44
+expected findings, 21 rules. Same labelling procedure and validity caveats as above; Nginx
+also matched on first comparison (including expected status).
+
 **Labelling procedure.** Single labeller (the author). Each file was written to target
 specific rules; expected `(rule_id, pointer, status)` tuples were written from the rule
 definitions in `docs/rules.md` *before* running the analyzer, then compared. Corpus v1
@@ -57,6 +73,10 @@ inter-rater agreement reported; (2) borderline-case analysis per rule.
 | API-OAS-008 | Rate limits enforced by a gateway but not documented in the spec |
 | API-OAS-009 | Fields named `debug`/`trace` that hold non-sensitive data |
 | API-OAS-010 | Path/query params named `token` that are one-time, non-secret identifiers |
+| NGX-HDR-002, NGX-TLS-003 | Headers added by an upstream app or CDN rather than nginx |
+| NGX-CFG-002 | `/metrics` or `/debug` protected by a firewall/network policy outside nginx |
+| NGX-RL-001 | Rate limiting in a gateway/WAF in front of nginx |
+| All "missing" Nginx rules | Settings in included files (mitigated: reported as `inconclusive`) |
 
 ## Metrics
 
