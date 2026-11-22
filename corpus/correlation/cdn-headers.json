@@ -1,0 +1,427 @@
+{
+  "base_url": "https://app.example.com/",
+  "http": {
+    "base-get": {
+      "body_bytes": 2,
+      "body_excerpt": "{}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://app.example.com/",
+      "headers": [
+        [
+          "server",
+          "cloudfront"
+        ],
+        [
+          "strict-transport-security",
+          "max-age=63072000"
+        ],
+        [
+          "x-content-type-options",
+          "nosniff"
+        ],
+        [
+          "x-frame-options",
+          "SAMEORIGIN"
+        ],
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "base-get",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 200,
+      "url": "https://app.example.com/"
+    },
+    "base-options": {
+      "body_bytes": 0,
+      "body_excerpt": "",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://app.example.com/",
+      "headers": [
+        [
+          "allow",
+          "GET, HEAD, OPTIONS"
+        ]
+      ],
+      "method": "OPTIONS",
+      "probe_id": "base-options",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 204,
+      "url": "https://app.example.com/"
+    },
+    "not-found": {
+      "body_bytes": 21,
+      "body_excerpt": "{\"error\":\"not found\"}",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://app.example.com/magen-probe-not-found-7f3a",
+      "headers": [
+        [
+          "server",
+          "cloudfront"
+        ],
+        [
+          "strict-transport-security",
+          "max-age=63072000"
+        ],
+        [
+          "x-content-type-options",
+          "nosniff"
+        ],
+        [
+          "x-frame-options",
+          "SAMEORIGIN"
+        ],
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "not-found",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://app.example.com/magen-probe-not-found-7f3a"
+    },
+    "path-actuator": {
+      "body_bytes": 9,
+      "body_excerpt": "Not Found",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://app.example.com/actuator",
+      "headers": [
+        [
+          "server",
+          "cloudfront"
+        ],
+        [
+          "strict-transport-security",
+          "max-age=63072000"
+        ],
+        [
+          "x-content-type-options",
+          "nosniff"
+        ],
+        [
+          "x-frame-options",
+          "SAMEORIGIN"
+        ],
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-actuator",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://app.example.com/actuator"
+    },
+    "path-env": {
+      "body_bytes": 9,
+      "body_excerpt": "Not Found",
+      "body_withheld": true,
+      "error": null,
+      "final_url": "https://app.example.com/.env",
+      "headers": [
+        [
+          "server",
+          "cloudfront"
+        ],
+        [
+          "strict-transport-security",
+          "max-age=63072000"
+        ],
+        [
+          "x-content-type-options",
+          "nosniff"
+        ],
+        [
+          "x-frame-options",
+          "SAMEORIGIN"
+        ],
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-env",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://app.example.com/.env"
+    },
+    "path-git-head": {
+      "body_bytes": 9,
+      "body_excerpt": "Not Found",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://app.example.com/.git/HEAD",
+      "headers": [
+        [
+          "server",
+          "cloudfront"
+        ],
+        [
+          "strict-transport-security",
+          "max-age=63072000"
+        ],
+        [
+          "x-content-type-options",
+          "nosniff"
+        ],
+        [
+          "x-frame-options",
+          "SAMEORIGIN"
+        ],
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-git-head",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://app.example.com/.git/HEAD"
+    },
+    "path-nginx-status": {
+      "body_bytes": 9,
+      "body_excerpt": "Forbidden",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://app.example.com/nginx_status",
+      "headers": [
+        [
+          "server",
+          "cloudfront"
+        ],
+        [
+          "strict-transport-security",
+          "max-age=63072000"
+        ],
+        [
+          "x-content-type-options",
+          "nosniff"
+        ],
+        [
+          "x-frame-options",
+          "SAMEORIGIN"
+        ],
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-nginx-status",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 403,
+      "url": "https://app.example.com/nginx_status"
+    },
+    "path-phpinfo": {
+      "body_bytes": 9,
+      "body_excerpt": "Not Found",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://app.example.com/phpinfo.php",
+      "headers": [
+        [
+          "server",
+          "cloudfront"
+        ],
+        [
+          "strict-transport-security",
+          "max-age=63072000"
+        ],
+        [
+          "x-content-type-options",
+          "nosniff"
+        ],
+        [
+          "x-frame-options",
+          "SAMEORIGIN"
+        ],
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-phpinfo",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://app.example.com/phpinfo.php"
+    },
+    "path-server-status": {
+      "body_bytes": 9,
+      "body_excerpt": "Not Found",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "https://app.example.com/server-status",
+      "headers": [
+        [
+          "server",
+          "cloudfront"
+        ],
+        [
+          "strict-transport-security",
+          "max-age=63072000"
+        ],
+        [
+          "x-content-type-options",
+          "nosniff"
+        ],
+        [
+          "x-frame-options",
+          "SAMEORIGIN"
+        ],
+        [
+          "content-type",
+          "application/json"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "path-server-status",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 404,
+      "url": "https://app.example.com/server-status"
+    },
+    "plain-http": {
+      "body_bytes": 0,
+      "body_excerpt": "",
+      "body_withheld": false,
+      "error": null,
+      "final_url": "http://app.example.com/",
+      "headers": [
+        [
+          "location",
+          "https://app.example.com/"
+        ]
+      ],
+      "method": "GET",
+      "probe_id": "plain-http",
+      "redirects": [],
+      "request_headers": [
+        [
+          "User-Agent",
+          "Magen/0.1 (authorized security scan; safe methods only)"
+        ],
+        [
+          "Accept",
+          "*/*"
+        ]
+      ],
+      "status": 301,
+      "url": "http://app.example.com/"
+    }
+  },
+  "skipped": [],
+  "target_host": "app.example.com",
+  "tls": {
+    "error": null,
+    "host": "app.example.com",
+    "legacy_protocols": {
+      "TLSv1": false,
+      "TLSv1.1": false
+    },
+    "port": 443,
+    "protocol": "TLSv1.3",
+    "verified": true,
+    "verify_error": null
+  }
+}

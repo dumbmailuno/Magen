@@ -84,14 +84,23 @@ class ScanRepository:
             s.flush()
             return scan.id
 
-    def finish(self, scan_id: int, status: str, findings: Sequence[Finding]) -> None:
-        """Record the final status and the findings in canonical order."""
+    def finish(
+        self,
+        scan_id: int,
+        status: str,
+        findings: Sequence[Finding],
+        *,
+        observations: str | None = None,
+    ) -> None:
+        """Record the final status, findings (canonical order) and recorded observations."""
         with self.db.session() as s:
             scan = s.get(Scan, scan_id)
             if scan is None:
                 raise NotFoundError("Scan not found")
             scan.status = status
             scan.finished_at = _now()
+            if observations is not None:
+                scan.observations = observations
             for position, f in enumerate(findings):
                 s.add(
                     FindingRecord(

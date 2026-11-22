@@ -48,6 +48,8 @@ class Scan(Base):
     commit: Mapped[str] = mapped_column(String(40), nullable=False)
     #: Non-secret scan options (rate limit, request cap, input file names/hashes).
     options: Mapped[dict[str, object]] = mapped_column(JSON, nullable=False, default=dict)
+    #: Recorded, redacted runtime observations (app.runtime.recording) for correlation/replay.
+    observations: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     target: Mapped[Target | None] = relationship(back_populates="scans")
     findings: Mapped[list[FindingRecord]] = relationship(

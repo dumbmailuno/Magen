@@ -131,27 +131,64 @@ files:
   - file: runtime/legacy-server.json
     kind: vulnerable
     expected:
-      - { rule_id: API-RT-001, pointer: "probe:plain-http", status: confirmed }
-      - { rule_id: API-RT-002, pointer: "probe:tls-legacy", status: confirmed }
-      - { rule_id: API-RT-003, pointer: "probe:tls-verify", status: confirmed }
-      - { rule_id: API-RT-004, pointer: "probe:base-get", status: confirmed }
-      - { rule_id: API-RT-005, pointer: "probe:base-get", status: confirmed }
-      - { rule_id: API-RT-006, pointer: "probe:base-get", status: confirmed }
-      - { rule_id: API-RT-007, pointer: "probe:base-get", status: confirmed }
-      - { rule_id: API-RT-008, pointer: "probe:not-found", status: confirmed }
-      - { rule_id: API-RT-011, pointer: "probe:base-options", status: confirmed }
+      - { rule_id: API-RT-001, pointer: "probe:plain-http", status: confirmed, source: runtime }
+      - { rule_id: API-RT-002, pointer: "probe:tls-legacy", status: confirmed, source: runtime }
+      - { rule_id: API-RT-003, pointer: "probe:tls-verify", status: confirmed, source: runtime }
+      - { rule_id: API-RT-004, pointer: "probe:base-get", status: confirmed, source: runtime }
+      - { rule_id: API-RT-005, pointer: "probe:base-get", status: confirmed, source: runtime }
+      - { rule_id: API-RT-006, pointer: "probe:base-get", status: confirmed, source: runtime }
+      - { rule_id: API-RT-007, pointer: "probe:base-get", status: confirmed, source: runtime }
+      - { rule_id: API-RT-008, pointer: "probe:not-found", status: confirmed, source: runtime }
+      - { rule_id: API-RT-011, pointer: "probe:base-options", status: confirmed, source: runtime }
 
   - file: runtime/exposed-files.json
     kind: vulnerable
     expected:
-      - { rule_id: API-RT-009, pointer: "probe:path-git-head", status: confirmed }
-      - { rule_id: API-RT-009, pointer: "probe:path-env", status: confirmed }
-      - { rule_id: API-RT-010, pointer: "probe:path-nginx-status", status: confirmed }
-      - { rule_id: API-RT-010, pointer: "probe:path-actuator", status: confirmed }
+      - { rule_id: API-RT-009, pointer: "probe:path-git-head", status: confirmed, source: runtime }
+      - { rule_id: API-RT-009, pointer: "probe:path-env", status: confirmed, source: runtime }
+      - { rule_id: API-RT-010, pointer: "probe:path-nginx-status", status: confirmed, source: runtime }
+      - { rule_id: API-RT-010, pointer: "probe:path-actuator", status: confirmed, source: runtime }
 
   - file: runtime/local-http-lab.json
     kind: tricky
     expected:
-      - { rule_id: API-RT-001, pointer: "probe:base-get", status: confirmed }
-      - { rule_id: API-RT-005, pointer: "probe:base-get", status: confirmed }
-      - { rule_id: API-RT-006, pointer: "probe:base-get", status: confirmed }
+      - { rule_id: API-RT-001, pointer: "probe:base-get", status: confirmed, source: runtime }
+      - { rule_id: API-RT-005, pointer: "probe:base-get", status: confirmed, source: runtime }
+      - { rule_id: API-RT-006, pointer: "probe:base-get", status: confirmed, source: runtime }
+
+# ---- Correlation (corpus v1, 2026-11-22) ---------------------------------------------------
+# Static inputs + a recorded runtime scan → expected final (rule_id, pointer, status, source).
+# Labels written from the status semantics in docs/architecture.md before running.
+correlation:
+  - case: agreement
+    static: [nginx/legacy-tls.conf]
+    runtime: runtime/legacy-server.json
+    expected:
+      - { rule_id: NGX-TLS-001, pointer: /http/0/server/0/ssl_protocols/0, status: confirmed, source: correlated }
+      - { rule_id: NGX-TLS-002, pointer: /http/0/server/0/ssl_ciphers/0, status: potential, source: static }
+      - { rule_id: NGX-TLS-003, pointer: /http/0/server/0, status: confirmed, source: correlated }
+      - { rule_id: API-RT-001, pointer: "probe:plain-http", status: confirmed, source: runtime }
+      - { rule_id: API-RT-003, pointer: "probe:tls-verify", status: confirmed, source: runtime }
+      - { rule_id: API-RT-005, pointer: "probe:base-get", status: confirmed, source: runtime }
+      # Config says server_tokens off, yet a version is served (e.g. another proxy): kept as
+      # a runtime finding — static and runtime disagree in the "runtime is worse" direction.
+      - { rule_id: API-RT-006, pointer: "probe:base-get", status: confirmed, source: runtime }
+      - { rule_id: API-RT-007, pointer: "probe:base-get", status: confirmed, source: runtime }
+      - { rule_id: API-RT-008, pointer: "probe:not-found", status: confirmed, source: runtime }
+      - { rule_id: API-RT-011, pointer: "probe:base-options", status: confirmed, source: runtime }
+
+  - case: contradiction
+    static: [correlation/cdn-headers.conf]
+    runtime: correlation/cdn-headers.json
+    expected:
+      - { rule_id: NGX-TLS-003, pointer: /http/0/server/0, status: inconclusive, source: correlated }
+      - { rule_id: NGX-HDR-002, pointer: /http/0/server/0, status: inconclusive, source: correlated }
+      - { rule_id: NGX-CFG-002, pointer: /http/0/server/0/location/0, status: inconclusive, source: correlated }
+
+  - case: different-host
+    static: [nginx/legacy-tls.conf]
+    runtime: runtime/hardened-api.json
+    expected:
+      - { rule_id: NGX-TLS-001, pointer: /http/0/server/0/ssl_protocols/0, status: potential, source: static }
+      - { rule_id: NGX-TLS-002, pointer: /http/0/server/0/ssl_ciphers/0, status: potential, source: static }
+      - { rule_id: NGX-TLS-003, pointer: /http/0/server/0, status: potential, source: static }

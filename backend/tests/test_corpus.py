@@ -36,7 +36,7 @@ def _analyze(rel: str, text: str | None = None, name: str | None = None) -> Any:
     text = text if text is not None else (CORPUS / rel).read_text(encoding="utf-8")
     if rel.startswith("runtime/"):
         return _RuntimeResult(run_runtime_rules(loads(text)))
-    analyze = analyze_nginx if rel.startswith("nginx/") else analyze_openapi
+    analyze = analyze_nginx if rel.endswith(".conf") else analyze_openapi
     return analyze(text, name or f"corpus/{rel}")
 
 
@@ -160,3 +160,60 @@ def test_runtime_evidence_never_contains_withheld_bodies() -> None:
             for ev in f.evidence:
                 assert "APP_KEY" not in (ev.response or "")
                 assert "DB_PASSWORD" not in ev.excerpt
+
+
+@pytest.mark.parametrize("entry", ENTRIES, ids=[e["file"] for e in ENTRIES])
+def test_expected_source_matches(entry: dict[str, Any]) -> None:
+    sources = {
+        (f.rule_id, f.evidence[0].location.pointer): f.source.value
+        for f in _analyze(entry["file"]).findings
+    }
+    for e in entry["expected"]:
+        if "source" in e:
+            assert sources[(e["rule_id"], e["pointer"])] == e["source"]
+
+
+CASES: list[dict[str, Any]] = LABELS.get("correlation", [])
+
+
+def _correlate(case: dict[str, Any]) -> Any:
+    from app.correlation.engine import RuntimeSource, StaticSource, correlate
+    from app.static.nginx.config import NginxConfig
+    from app.static.openapi.document import OpenApiDocument
+
+    statics = []
+    for rel in case["static"]:
+        text = (CORPUS / rel).read_text(encoding="utf-8")
+        doc = NginxConfig(rel, text) if rel.endswith(".conf") else OpenApiDocument(rel, text)
+        statics.append(StaticSource(doc, tuple(_analyze(rel, text, rel).findings)))
+    obs = loads((CORPUS / case["runtime"]).read_text(encoding="utf-8"))
+    return correlate(statics, RuntimeSource(obs, tuple(run_runtime_rules(obs))))
+
+
+@pytest.mark.parametrize("case", CASES, ids=[c["case"] for c in CASES])
+def test_correlation_matches_labels(case: dict[str, Any]) -> None:
+    result = _correlate(case)
+    got = {
+        (f.rule_id, f.evidence[0].location.pointer, f.status.value, f.source.value)
+        for f in result.findings
+    }
+    expected = {(e["rule_id"], e["pointer"], e["status"], e["source"]) for e in case["expected"]}
+    assert got == expected
+
+
+@pytest.mark.parametrize("case", CASES, ids=[c["case"] for c in CASES])
+def test_correlation_keeps_static_ids_and_is_deterministic(case: dict[str, Any]) -> None:
+    first, second = _correlate(case), _correlate(case)
+    assert first == second
+    static_ids = {f.id for rel in case["static"] for f in _analyze(rel, None, rel).findings}
+    for f in first.findings:
+        if f.source.value == "correlated":
+            assert f.id in static_ids  # retest comparisons stay stable
+
+
+def test_contradicted_findings_carry_the_runtime_evidence() -> None:
+    case = next(c for c in CASES if c["case"] == "contradiction")
+    for f in _correlate(case).findings:
+        kinds = {e.kind.value for e in f.evidence}
+        assert kinds == {"nginx", "http"}
+        assert f.title.endswith("— not observed at runtime")

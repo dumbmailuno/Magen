@@ -28,6 +28,7 @@ from app.rules.registry import registry
 from app.runtime.client import AuditEntry, AuthHeader, SafeHttpClient
 from app.runtime.observations import RuntimeObservations
 from app.runtime.probes import collect, plan_size
+from app.runtime.recording import dumps
 from app.runtime.resolver import Resolver, SystemResolver
 from app.storage.repositories import ScanRepository
 from app.version import commit_hash
@@ -167,7 +168,8 @@ class ScanManager:
                 f"({', '.join(obs.skipped)})."
             )
         job.findings = run_runtime_rules(obs) if status != "failed" else []
-        self.scans.finish(job.id, status, job.findings)
+        recorded = dumps(obs) if status != "failed" else None
+        self.scans.finish(job.id, status, job.findings, observations=recorded)
         job.status, job.finished_at = status, datetime.now(tz=UTC)
         job.done = job.total if status == "done" else job.done
         log.info(

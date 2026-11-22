@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ipaddress
 import re
 from dataclasses import dataclass
 from typing import Final
@@ -262,3 +263,74 @@ def header_contexts(config: NginxConfig, server: Server) -> list[HeaderContext]:
             _, parent_headers = config.effective_headers(ctx.chain[1:])
             out.append(HeaderContext(ctx, headers, parent_headers))
     return out
+
+
+def directive_at(config: NginxConfig, pointer: str) -> Directive | None:
+    """The directive with this structural pointer (``""`` is the root)."""
+    if pointer == "":
+        return config.root
+    return next((d for d, _ in config.root.walk() if d.pointer == pointer), None)
+
+
+def _name_matches(pattern: str, host: str) -> bool:
+    pattern = pattern.lower()
+    if pattern.startswith("*."):
+        return host.endswith(pattern[1:])
+    if pattern.startswith("."):
+        return host == pattern[1:] or host.endswith(pattern)
+    if pattern.startswith("~"):
+        return False  # regex server names are not evaluated
+    return pattern == host
+
+
+def servers_for_host(config: NginxConfig, host: str) -> list[Server]:
+    """Servers nginx would use for ``host``: explicit server_name matches, else catch-alls.
+
+    A catch-all is a server with no/empty/``_`` server_name or a ``default_server`` listener.
+    For an IP target with no match, nginx's default (first) server applies.
+    """
+    host = host.lower()
+    servers = config.servers()
+    named = [
+        s
+        for s in servers
+        if any(_name_matches(n, host) for d in s.block.find("server_name") for n in d.args)
+    ]
+    if named:
+        return named
+    catch_all = [
+        s
+        for s in servers
+        if not s.block.find("server_name")
+        or all(n in ("_", "", '""') for d in s.block.find("server_name") for n in d.args)
+        or any("default_server" in d.args for d in s.block.find("listen"))
+    ]
+    if catch_all:
+        return catch_all
+    # Scanning by IP: the Host header is the IP, so nginx falls back to the default (first)
+    # server. For a host *name* we never assume an unrelated config is deployed there.
+    try:
+        ipaddress.ip_address(host.strip("[]"))
+    except ValueError:
+        return []
+    return servers[:1]
+
+
+def location_covers(location: Directive, path: str) -> bool:
+    """Does this ``location`` match the request path? (prefix, exact and regex forms)."""
+    args = location.args
+    if not args:
+        return False
+    if len(args) == 1:
+        return path.startswith(args[0])
+    modifier, value = args[0], args[-1]
+    if modifier == "=":
+        return path == value
+    if modifier == "^~":
+        return path.startswith(value)
+    if modifier in ("~", "~*"):
+        try:
+            return re.search(value, path, re.IGNORECASE if modifier == "~*" else 0) is not None
+        except re.error:
+            return False
+    return False
