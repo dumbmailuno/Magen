@@ -24,7 +24,69 @@ See `docs/finding.schema.json` (generated from `backend/app/models/finding.py` b
 
 ## Rules
 
-_None yet — the first OpenAPI rules land in roadmap week 3–4._
+Static OpenAPI findings are `potential` by default: a spec states intent, and only runtime
+correlation (week 9–10) can confirm what the deployed system does.
 
 | ID | Title | Severity | Target | OWASP | CWE | Status |
 |---|---|---|---|---|---|---|
+| API-OAS-001 | Server URL uses plain HTTP | high | openapi | API8:2023 | CWE-319 | active |
+| API-OAS-002 | No security schemes are defined | medium | openapi | API2:2023 | CWE-306 | active |
+| API-OAS-003 | Operation does not require authentication | medium | openapi | API2:2023 | CWE-306 | active |
+| API-OAS-004 | HTTP Basic authentication is used | medium | openapi | API2:2023 | CWE-522 | active |
+| API-OAS-005 | API key is sent in the query string | medium | openapi | API2:2023 | CWE-598 | active |
+| API-OAS-006 | OAuth2 flow is deprecated | medium | openapi | API2:2023 | CWE-1390 | active |
+| API-OAS-007 | Security requirement references an undefined scheme | medium | openapi | API8:2023 | — | active |
+| API-OAS-008 | No rate limiting is documented | low | openapi | API4:2023 | CWE-770 | active |
+| API-OAS-009 | Response schema exposes internal error details | low | openapi | API8:2023 | CWE-209 | active |
+| API-OAS-010 | Credential is passed in the URL | medium | openapi | API2:2023 | CWE-598 | active |
+
+`tests/test_rules_docs.py` fails if this table and the registry disagree.
+
+### Rule details
+
+**API-OAS-001 — Server URL uses plain HTTP.** Checks `servers` at root, path-item and
+operation level. A templated scheme (`{scheme}://`) is flagged if its default or enum allows
+`http`. *Not flagged:* loopback hosts (`localhost`, `127.0.0.1`, `::1`, `*.localhost`),
+relative URLs. *Evidence:* `/servers/<i>/url`.
+
+**API-OAS-002 — No security schemes are defined.** The spec has operations but
+`components.securitySchemes` is missing or empty. One document-level finding.
+
+**API-OAS-003 — Operation does not require authentication.** Effective security (operation's
+own `security`, else root) is missing, `[]`, or contains `{}` (optional auth).
+*Known false-positive source:* intentionally public endpoints (`/health`, `/login`) — they are
+reported for human review by design. *Evidence:* the operation's `security`, or the operation.
+
+**API-OAS-004 — HTTP Basic.** `type: http`, `scheme: basic` (case-insensitive).
+
+**API-OAS-005 — API key in query.** `type: apiKey`, `in: query`.
+
+**API-OAS-006 — Deprecated OAuth2 flow.** `implicit` or `password` flows (RFC 9700). One
+finding per flow.
+
+**API-OAS-007 — Undefined scheme.** A security requirement (root or operation) names a scheme
+missing from `components.securitySchemes`. Names are case-sensitive.
+
+**API-OAS-008 — No rate limiting documented.** No operation documents `429` or a
+`RateLimit*` / `X-RateLimit*` / `Retry-After` response header. `4XX` does not count. A hint
+only: a gateway may still enforce limits. One document-level finding at `/paths`.
+
+**API-OAS-009 — Internal error details in responses.** A property reachable from a response
+schema (via `$ref`, `allOf/oneOf/anyOf`, `items`, `additionalProperties`) is named exactly
+(after lowercasing and removing `_ - .`) `stacktrace`, `stack`, `trace`, `backtrace`,
+`exception`, `innerexception`, `exceptiontrace`, `debug`, `debuginfo`, `debugmessage`,
+`sqlquery` or `sqlerror`. `traceId`, `debugMode` are not flagged. Request bodies and
+unreferenced schemas are ignored. One finding per property location.
+
+**API-OAS-010 — Credential in the URL.** A `query` or `path` parameter (path-item or
+operation level, `$ref` resolved) named, after normalization, `password`, `passwd`, `pwd`,
+`secret`, `clientsecret`, `token`, `accesstoken`, `refreshtoken`, `idtoken`, `authtoken`,
+`apikey`, `sessionid` or `sessiontoken`. Header/cookie parameters are not flagged. A shared
+`$ref` parameter is reported once, at its definition.
+
+## Parser guarantees
+
+`backend/app/static/openapi/loader.py`: `yaml.SafeLoader` only, non-standard tags rejected,
+5 MB cap, nesting ≤ 64, ≤ 200 000 nodes (alias-bomb defence), mapping keys kept as raw text
+(YAML 1.1 `on:`/`200:` are not coerced). Only local `#/` refs are resolved; external refs are
+never fetched. Swagger 2.0 is rejected with a clear error.
