@@ -82,3 +82,24 @@ def redact_headers(
         else:
             out[name] = redact_text(value, extra_secrets)
     return out
+
+
+_ASSIGNMENT: Final = re.compile(r"^(\s*[A-Za-z_][A-Za-z0-9_.\-]*\s*[=:])")
+
+
+def mask_values(text: str) -> str:
+    """Keep only the *shape* of a sensitive file: ``KEY=••••`` per assignment line.
+
+    Used for bodies that must never be stored (e.g. a served ``.env``): rules can still
+    count variables, but no value survives, not even in memory.
+    """
+    out: list[str] = []
+    for line in text.splitlines():
+        m = _ASSIGNMENT.match(line)
+        if m:
+            out.append(f"{m.group(1).strip()}{REDACTED}")
+        elif line.strip():
+            out.append(REDACTED)
+        else:
+            out.append("")
+    return "\n".join(out)
