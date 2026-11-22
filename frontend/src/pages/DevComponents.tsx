@@ -1,8 +1,15 @@
 import { Play, Server } from "lucide-react";
+import { useState } from "react";
 import type { ReactNode } from "react";
 import { AiPanel } from "@/components/AiPanel";
 import { EmptyState } from "@/components/EmptyState";
 import { EvidenceBlock } from "@/components/EvidenceBlock";
+import { FileField } from "@/components/FileField";
+import { FilterBar } from "@/components/FilterBar";
+import { FindingList } from "@/components/FindingList";
+import { FixCard } from "@/components/FixCard";
+import { SummaryStrip } from "@/components/SummaryStrip";
+import { Alert } from "@/components/ui/alert";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SeverityBadge } from "@/components/SeverityBadge";
 import { SourceTag } from "@/components/SourceTag";
@@ -10,7 +17,8 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FINDING_STATUSES, SEVERITIES, SOURCES } from "@/lib/types";
+import { NO_FILTERS, type Filters } from "@/lib/findings";
+import { FINDING_STATUSES, SEVERITIES, SOURCES, type Finding } from "@/lib/types";
 import { AppearanceControls } from "@/pages/SettingsPage";
 
 /**
@@ -54,7 +62,51 @@ Server: nginx/1.18.0`;
 const FALLBACK =
   "The server URL uses plain HTTP, so credentials and data can be read or modified in transit. Serve the API over HTTPS only.";
 
+function sample(i: number, severity: Finding["severity"], status: Finding["status"]): Finding {
+  return {
+    id: `sample${i}`,
+    rule_id: "NGX-TLS-003",
+    title:
+      i === 2
+        ? "A very long finding title that has to truncate with a tooltip showing the full text in the list"
+        : `Sample finding ${i}`,
+    category: "Transport security",
+    severity,
+    status,
+    source: i === 1 ? "runtime" : "static",
+    evidence: [
+      {
+        kind: "nginx",
+        location: {
+          file: "very/long/path/to/sites-available/api.example.com.conf",
+          line: 12 + i,
+          end_line: null,
+          pointer: "/http/0",
+          url: null,
+        },
+        excerpt: "add_header X 1;",
+        request: null,
+        response: null,
+      },
+    ],
+    references: { owasp_api: ["API8:2023"], cwe: ["CWE-319"], links: [] },
+    remediation: {
+      template_fix: 'add_header Strict-Transport-Security "max-age=31536000" always;',
+      ai_fix: null,
+      validated: i === 1,
+    },
+    ai_explanation: null,
+  };
+}
+
+const CRITICAL = sample(0, "critical", "confirmed");
+const HIGH = sample(1, "high", "potential");
+const SAMPLES: Finding[] = [CRITICAL, HIGH, sample(2, "low", "inconclusive")];
+
 export function DevComponentsPage() {
+  const [file, setFile] = useState<File | null>(null);
+  const [filters, setFilters] = useState<Filters>(NO_FILTERS);
+  const [selected, setSelected] = useState("sample0");
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="Components" description="Design-system review page (dev builds only)." />
@@ -158,6 +210,63 @@ export function DevComponentsPage() {
           fallback={FALLBACK}
           onRegenerate={() => undefined}
         />
+      </Section>
+
+      <Section title="FileField">
+        <div className="grid grid-cols-2 gap-4">
+          <FileField
+            label="OpenAPI spec"
+            accept=".yaml,.yml,.json"
+            file={file}
+            onChange={setFile}
+            helper="Selected / empty states"
+          />
+          <FileField
+            label="With error"
+            accept=".conf"
+            file={null}
+            onChange={() => undefined}
+            error="File is larger than 5 MB."
+          />
+          <FileField
+            label="Disabled"
+            accept=".conf"
+            file={null}
+            onChange={() => undefined}
+            disabled
+          />
+        </div>
+      </Section>
+
+      <Section title="Alert">
+        <Alert tone="info" title="Some configuration was not visible">
+          snippets/security-headers.conf (line 7) was not analyzed.
+        </Alert>
+        <Alert
+          tone="warning"
+          title="Partial results: 1 of 2 inputs could not be analyzed"
+          action={
+            <Button variant="secondary" size="sm">
+              Retry
+            </Button>
+          }
+        />
+        <Alert tone="danger" title="The scan failed">
+          {"bad.conf: line 1: unexpected '}'"}
+        </Alert>
+      </Section>
+
+      <Section title="SummaryStrip, FilterBar & FindingList">
+        <SummaryStrip findings={SAMPLES} />
+        <SummaryStrip findings={[]} />
+        <FilterBar filters={filters} onChange={setFilters} />
+        <FindingList findings={SAMPLES} selectedId={selected} onSelect={setSelected} />
+      </Section>
+
+      <Section title="FixCard">
+        <FixCard remediation={CRITICAL.remediation} ruleId="NGX-TLS-003" />
+        <FixCard remediation={HIGH.remediation} ruleId="NGX-TLS-003" />
+        <FixCard remediation={{ template_fix: null, ai_fix: null, validated: false }} ruleId="X" />
       </Section>
 
       <Section title="Skeleton & EmptyState">

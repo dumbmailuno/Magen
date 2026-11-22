@@ -28,4 +28,9 @@ export default tseslint.config(
       "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }],
     },
   },
+  {
+    // Tests index into fixtures that are known to be non-empty.
+    files: ["**/*.test.{ts,tsx}"],
+    rules: { "@typescript-eslint/no-non-null-assertion": "off" },
+  },
 );

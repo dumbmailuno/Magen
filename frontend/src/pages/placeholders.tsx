@@ -1,4 +1,4 @@
-import { GitCompare, ListChecks, Play, Server } from "lucide-react";
+import { GitCompare, Server } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -14,35 +14,6 @@ export function TargetsPage() {
         title="No targets yet"
         description="Add a host you own or have written permission to test. Runtime probes only run against confirmed targets."
         action={<Button disabled>Add target</Button>}
-      />
-    </>
-  );
-}
-
-export function NewScanPage() {
-  return (
-    <>
-      <PageHeader
-        title="New scan"
-        description="Analyze an OpenAPI spec, an Nginx config, or a live API."
-      />
-      <EmptyState
-        icon={Play}
-        title="Scanning is not available yet"
-        description="Static analysis arrives in the next milestone."
-      />
-    </>
-  );
-}
-
-export function FindingsPage() {
-  return (
-    <>
-      <PageHeader title="Findings" />
-      <EmptyState
-        icon={ListChecks}
-        title="No findings"
-        description="Run a scan to see findings here."
       />
     </>
   );

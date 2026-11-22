@@ -121,3 +121,32 @@ describe("EvidenceBlock", () => {
     expect(container.querySelectorAll("code > div")).toHaveLength(3);
   });
 });
+
+describe("FixCard / FindingDetail building blocks", () => {
+  it("SummaryStrip counts are text next to labelled badges", async () => {
+    const { SummaryStrip } = await import("@/components/SummaryStrip");
+    const { default: fixture } = await import("@/test/fixtures/nginx-legacy-tls.json");
+    render(<SummaryStrip findings={(fixture as import("@/lib/types").NginxResult).findings} />);
+    const sev = screen.getByRole("list", { name: "By severity" });
+    expect(sev).toHaveTextContent("High2");
+    expect(sev).toHaveTextContent("Medium1");
+  });
+
+  it("FilterBar chips expose pressed state", async () => {
+    const { FilterBar } = await import("@/components/FilterBar");
+    const onChange = vi.fn();
+    render(
+      <FilterBar filters={{ severity: ["high"], status: [], source: [] }} onChange={onChange} />,
+    );
+    expect(screen.getByRole("button", { name: "Severity high" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Status potential" }));
+    expect(onChange).toHaveBeenCalledWith({
+      severity: ["high"],
+      status: ["potential"],
+      source: [],
+    });
+  });
+});

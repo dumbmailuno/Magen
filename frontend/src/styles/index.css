@@ -23,3 +23,11 @@
     font-variant-numeric: tabular-nums;
   }
 }
+
+@layer utilities {
+  /* Long finding lists: skip layout/paint for off-screen rows (design-system §8 FindingTable). */
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto var(--row-h);
+  }
+}
