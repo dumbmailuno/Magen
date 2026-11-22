@@ -9,6 +9,8 @@ const preset: Partial<Config> = {
   darkMode: ["class", '[data-theme="dark"]'],
   theme: {
     extend: {
+      // design-system §4: master–detail stacks below 1100px.
+      screens: { split: "1100px" },
       colors: {
         bg: v("color-bg"),
         surface: { DEFAULT: v("color-surface"), raised: v("color-surface-raised") },

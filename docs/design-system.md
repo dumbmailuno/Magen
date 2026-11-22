@@ -118,7 +118,7 @@ Code/evidence: `font-mono`, 13px (`text-sm`+), line-height 1.6, `tabular-nums` f
 ## 4. Spacing, layout, shape, depth
 
 - **Base unit 4px.** Scale: 4, 8, 12, 16, 20, 24, 32, 48, 64 (`space-1…16`).
-- **Layout:** fixed left sidebar (232px, collapses to 56px) + main content (max 1280px). Master–detail for Findings (list left, detail right; stacked below 1100px).
+- **Layout:** fixed left sidebar (232px, collapses to 56px) + main content (max 1280px). Master–detail for Findings (list left, detail right; stacked below 1100px — Tailwind `split:` screen in the preset).
 - **Breakpoints (window width):** 1024 min · 1280 comfortable · 1600 wide. Not mobile — Electron desktop.
 - **Density:** compact (row 28px), default (36px), comfortable (44px). Set in Settings; stored per user.
 - **Radius:** sm 4 (badges, inputs inner), md 8 (buttons, inputs, cards), lg 12 (dialogs). One radius family per component — never mix.
@@ -157,7 +157,7 @@ Built on shadcn/ui primitives, restyled via tokens. Prefer composing shadcn; add
 | **SourceTag** | static/runtime/correlated | Icon + label. |
 | **AiPanel** | collapsed, loading, ready, unavailable, error | `ai` tint, sparkles icon, caption, regenerate, "copy". Unavailable → shows deterministic template explanation + "Start Ollama" hint. |
 | **FindingRow** | default, hover, selected, resolved (retest) | Columns: severity, title, rule id, location, status, source. |
-| **FindingTable** | sortable, filterable, empty, loading (skeleton), error | Virtualize > 200 rows. Filters persist in URL hash/state. |
+| **FindingTable** | sortable, filterable, empty, loading (skeleton), error | Implemented as `FindingList`: a `listbox` with roving focus (↑/↓/Home/End, selection follows focus). Rows use `content-visibility: auto` so 10 000 rows stay cheap without a virtualization dependency. Filters persist in the URL (`?sev=&status=&source=&f=`). |
 | **EvidenceBlock** | code, request/response, config excerpt | Mono, line numbers, highlighted lines, copy, redacted tokens shown as `••••`. |
 | **DiffView** | unified / split | `diff-add` / `diff-del` tints + `+`/`−` gutter glyphs (not color-only). |
 | **FixCard** | template fix, AI fix; validated / not validated | Export & copy actions; never an "Apply to file" button (Option B). |
@@ -169,6 +169,10 @@ Built on shadcn/ui primitives, restyled via tokens. Prefer composing shadcn; add
 | **CopyButton** | idle, copied | Ghost icon button; `aria-label` switches to "Copied". Used by EvidenceBlock, AiPanel, FixCard. |
 | **Logo** | mark | Shield + check, `currentColor`, `aria-hidden` (wordmark carries the name). |
 | **BackendStatus** | checking, ok, error | Sidebar footer; icon + text, `role=status` polite live region; shows version + commit. |
+| **FileField** | empty, selected, error, disabled | Labelled file picker (`<input type=file>` visually styled); shows file name + size, clear button (`aria-label`), helper/error text. Reads the file locally; nothing is uploaded anywhere but the loopback backend. |
+| **SummaryStrip** | default, empty | Counts per severity (SeverityBadge + tabular number) and per status (StatusBadge + number). Text-only counts, never color-only. |
+| **FilterBar** | none active, some active | Toggle chips (`aria-pressed`) for severity, status, source; icon + label; "Clear filters" ghost button. |
+| **Alert** | info, warning, danger | Feedback tint + icon + text; `role=alert` for errors, `role=status` otherwise; optional action (e.g. Retry). Used for partial / failed scans and coverage notes (unresolved includes). |
 | **Toast / Alert / Dialog / Tooltip / Tabs / Sidebar** | shadcn defaults, token-styled | Alerts use feedback colors + icons. |
 
 ## 9. Screens (page tree, in reading order)
@@ -221,4 +225,4 @@ Default · loading (skeleton) · empty · error (with retry) · partial (some pr
 - A Storybook (or `/dev/components` route) renders every component × state × theme × density for visual review and screenshots for the thesis.
 - Visual changes that alter tokens bump the design-system version in this file's header and are noted in `CHANGELOG.md`.
 
-*Design system version: 0.1.1*
+*Design system version: 0.2.0*
