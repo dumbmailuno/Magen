@@ -60,7 +60,7 @@ class Rule(ABC, Generic[InputT]):
         *,
         title: str | None = None,
         status: FindingStatus = FindingStatus.POTENTIAL,
-        source: Source = Source.STATIC,
+        source: Source | None = None,
     ) -> Finding:
         """Build a finding carrying this rule's metadata and template fix.
 
@@ -76,7 +76,9 @@ class Rule(ABC, Generic[InputT]):
             category=self.category,
             severity=self.severity,
             status=status,
-            source=source,
+            # Runtime rules observe the live system; everything else reads files.
+            source=source
+            or (Source.RUNTIME if self.target is RuleTarget.RUNTIME else Source.STATIC),
             evidence=evidence,
             references=self.references,
             remediation=Remediation(template_fix=self.remediation_template),
