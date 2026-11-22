@@ -7,6 +7,8 @@ import { EvidenceBlock } from "@/components/EvidenceBlock";
 import { FileField } from "@/components/FileField";
 import { FilterBar } from "@/components/FilterBar";
 import { FindingList } from "@/components/FindingList";
+import { CompareView } from "@/components/CompareView";
+import { DiffView } from "@/components/DiffView";
 import { FixCard } from "@/components/FixCard";
 import { ProbeLog } from "@/components/ProbeLog";
 import { ScanProgress } from "@/components/ScanProgress";
@@ -21,7 +23,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { NO_FILTERS, type Filters } from "@/lib/findings";
-import { FINDING_STATUSES, SEVERITIES, SOURCES, type Finding } from "@/lib/types";
+import remediationFixture from "@/test/fixtures/remediation-legacy.json";
+import retestFixture from "@/test/fixtures/session-retest.json";
+import { FINDING_STATUSES, SEVERITIES, SOURCES, type Finding, type Session } from "@/lib/types";
 import { AppearanceControls } from "@/pages/SettingsPage";
 
 /**
@@ -102,6 +106,7 @@ function sample(i: number, severity: Finding["severity"], status: Finding["statu
   };
 }
 
+const RETEST_COMPARISON = (retestFixture as Session).comparison;
 const CRITICAL = sample(0, "critical", "confirmed");
 const HIGH = sample(1, "high", "potential");
 const SAMPLES: Finding[] = [CRITICAL, HIGH, sample(2, "low", "inconclusive")];
@@ -270,6 +275,12 @@ export function DevComponentsPage() {
         <FixCard remediation={CRITICAL.remediation} ruleId="NGX-TLS-003" />
         <FixCard remediation={HIGH.remediation} ruleId="NGX-TLS-003" />
         <FixCard remediation={{ template_fix: null, ai_fix: null, validated: false }} ruleId="X" />
+      </Section>
+
+      <Section title="DiffView & CompareView">
+        <DiffView diff={remediationFixture.diff} filename="legacy-tls.conf" />
+        <DiffView diff="" filename="unchanged.conf" />
+        {RETEST_COMPARISON && <CompareView comparison={RETEST_COMPARISON} />}
       </Section>
 
       <Section title="ScanProgress">

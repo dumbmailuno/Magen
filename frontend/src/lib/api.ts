@@ -3,10 +3,15 @@ import type {
   Health,
   NginxResult,
   OpenApiResult,
+  Comparison,
+  InputKind,
   ProbeAudit,
+  RemediationPreview,
   RuleInfo,
   RuntimeScan,
   RuntimeScanRequest,
+  Session,
+  SessionSummary,
   Target,
 } from "./types";
 
@@ -95,4 +100,19 @@ export const api = {
   scan: (id: number) => request<RuntimeScan>(`/api/scans/${id}`),
   stopScan: (id: number) => request<RuntimeScan>(`/api/scans/${id}/stop`, { method: "POST" }),
   audit: (id: number) => request<ProbeAudit[]>(`/api/scans/${id}/audit`),
+  createSession: (body: {
+    inputs: { kind: InputKind; filename: string; content: string }[];
+    runtime_scan_id?: number;
+    baseline_id?: number;
+  }) => request<Session>("/api/sessions", post(body)),
+  sessions: () => request<SessionSummary[]>("/api/sessions"),
+  session: (id: number) => request<Session>(`/api/sessions/${id}`),
+  compare: (base: number, head: number) =>
+    request<Comparison>(`/api/sessions/compare?base=${base}&head=${head}`),
+  remediationPreview: (body: {
+    kind: InputKind;
+    filename: string;
+    content: string;
+    finding_ids?: string[];
+  }) => request<RemediationPreview>("/api/remediation/preview", post(body)),
 };

@@ -159,7 +159,8 @@ Built on shadcn/ui primitives, restyled via tokens. Prefer composing shadcn; add
 | **FindingRow** | default, hover, selected, resolved (retest) | Columns: severity, title, rule id, location, status, source. |
 | **FindingTable** | sortable, filterable, empty, loading (skeleton), error | Implemented as `FindingList`: a `listbox` with roving focus (↑/↓/Home/End, selection follows focus). Rows use `content-visibility: auto` so 10 000 rows stay cheap without a virtualization dependency. Filters persist in the URL (`?sev=&status=&source=&f=`). |
 | **EvidenceBlock** | code, request/response, config excerpt | Mono, line numbers, highlighted lines, copy, redacted tokens shown as `••••`. |
-| **DiffView** | unified / split | `diff-add` / `diff-del` tints + `+`/`−` gutter glyphs (not color-only). |
+| **DiffView** | unified / split; empty | `diff-add` / `diff-del` tints + `+`/`−` gutter glyphs (not color-only); hunk headers muted; mono; `aria-label` per changed line ("added", "removed"); toggle is a two-option radio group. |
+| **RemediationPanel** | idle, generating, ready (validated / not validated / partial), error | Lists each finding's outcome (Fixed + Validated, Template only, Conflict) with icons + text, the nginx -t / re-parse status, a DiffView, and Export corrected file / Export patch. Never an Apply action. |
 | **FixCard** | template fix, AI fix; validated / not validated | Export & copy actions; never an "Apply to file" button (Option B). |
 | **ScanProgress** | idle, running, cancelling, done, failed | Always a visible Stop button. Stage stepper (Static → Runtime) with icon + text per stage; determinate `.progress` bar (token-styled, value as `aria-valuenow`) plus `aria-live` text "Probing 3/13 · GET /.git/HEAD". |
 | **TargetAllowlistForm** | host input, authorization checkbox, confirm | Records timestamp; clear warning copy (see §10). |
@@ -226,4 +227,4 @@ Default · loading (skeleton) · empty · error (with retry) · partial (some pr
 - A Storybook (or `/dev/components` route) renders every component × state × theme × density for visual review and screenshots for the thesis.
 - Visual changes that alter tokens bump the design-system version in this file's header and are noted in `CHANGELOG.md`.
 
-*Design system version: 0.3.0*
+*Design system version: 0.4.0*

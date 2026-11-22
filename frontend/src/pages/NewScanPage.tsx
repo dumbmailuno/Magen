@@ -1,6 +1,6 @@
 import { Play } from "lucide-react";
 import { useEffect, useId, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { FileField } from "@/components/FileField";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { AUTHORIZATION_NOTICE } from "@/components/TargetAllowlistForm";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { useScan, type ScanInput } from "@/lib/scan";
-import type { InputKind, Target } from "@/lib/types";
+import type { InputKind, SessionSummary, Target } from "@/lib/types";
 
 /** Must match the backend loaders' MAX_BYTES. */
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -52,6 +52,11 @@ export function NewScanPage() {
   const [rate, setRate] = useState("5");
   const [cap, setCap] = useState("50");
   const [readError, setReadError] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const [sessions, setSessions] = useState<SessionSummary[]>([]);
+  const [baselineId, setBaselineId] = useState<number | null>(
+    searchParams.get("baseline") ? Number(searchParams.get("baseline")) : null,
+  );
 
   useEffect(() => {
     api
@@ -59,6 +64,12 @@ export function NewScanPage() {
       .then(setTargets)
       .catch(() => {
         setTargets([]);
+      });
+    api
+      .sessions()
+      .then(setSessions)
+      .catch(() => {
+        setSessions([]);
       });
   }, []);
 
@@ -112,7 +123,7 @@ export function NewScanPage() {
     }
     setHeaderValue(""); // the value now lives only in the scan session's memory
     void navigate("/findings");
-    await run(inputs);
+    await run({ inputs, baselineId });
   };
 
   return (
@@ -258,6 +269,36 @@ export function NewScanPage() {
                 scan. You can stop at any time.
               </p>
             </>
+          )}
+        </fieldset>
+
+        <fieldset className="flex flex-col gap-2 rounded-md border border-border bg-surface p-6">
+          <legend className="px-1 text-lg font-semibold">Retest</legend>
+          <label htmlFor={`${ids}-baseline`} className="text-sm font-medium text-fg">
+            Compare with a previous session
+          </label>
+          <select
+            id={`${ids}-baseline`}
+            className="h-9 rounded-md border border-border-strong bg-surface px-3 text-base text-fg"
+            value={baselineId ?? ""}
+            disabled={running}
+            onChange={(e) => {
+              setBaselineId(e.target.value ? Number(e.target.value) : null);
+            }}
+          >
+            <option value="">None</option>
+            {sessions.map((s) => (
+              <option key={s.id} value={s.id}>
+                #{s.id} · {s.inputs.join(", ") || "runtime only"} · {s.total} findings ·{" "}
+                {s.created_at.slice(0, 16).replace("T", " ")}
+              </option>
+            ))}
+          </select>
+          {baselineId !== null && (
+            <p className="text-sm text-fg-muted">
+              Choose the updated files (and the same live API) to see what was resolved, what
+              persists and what is new.
+            </p>
           )}
         </fieldset>
 

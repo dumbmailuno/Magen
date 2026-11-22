@@ -162,3 +162,85 @@ export interface RuntimeScanRequest {
   rate_per_second?: number;
   request_cap?: number;
 }
+
+/** Mirror of backend app/api/sessions.py. */
+export interface SessionInput {
+  kind: InputKind;
+  filename: string;
+  sha256: string;
+  ok: boolean;
+  error: string | null;
+  notes: string[];
+}
+
+export interface Comparison {
+  baseline_id: number;
+  current_id: number;
+  resolved: Finding[];
+  persists: Finding[];
+  new: Finding[];
+  status_changes: {
+    finding_id: string;
+    rule_id: string;
+    title: string;
+    before: string;
+    after: string;
+  }[];
+  remediation_rate: number | null;
+  /** Fixed in config/spec, but the live system still shows the issue (not redeployed?). */
+  still_observed: Finding[];
+  changed_inputs: string[];
+}
+
+export interface Session {
+  id: number;
+  created_at: string;
+  generated_by: string;
+  baseline_id: number | null;
+  inputs: SessionInput[];
+  runtime_scan_id: number | null;
+  runtime_notes: string[];
+  correlation: {
+    confirmed: number;
+    contradicted: number;
+    runtime_only: number;
+    static_only: number;
+  };
+  findings: Finding[];
+  comparison: Comparison | null;
+}
+
+export interface SessionSummary {
+  id: number;
+  created_at: string;
+  inputs: string[];
+  runtime_scan_id: number | null;
+  baseline_id: number | null;
+  total: number;
+  by_severity: Partial<Record<Severity, number>>;
+}
+
+/** Mirror of backend app/api/remediation.py. */
+export type FixOutcome = "applied" | "template_only" | "conflict";
+
+export interface RemediationPreview {
+  filename: string;
+  patched_filename: string;
+  patched_content: string;
+  diff: string;
+  fixes: {
+    finding_id: string;
+    rule_id: string;
+    title: string;
+    outcome: FixOutcome;
+    validated: boolean | null;
+  }[];
+  validation: {
+    parsed: boolean;
+    error: string | null;
+    resolved: string[];
+    unresolved: string[];
+    introduced: Finding[];
+    syntax: { status: string; message: string };
+  };
+}

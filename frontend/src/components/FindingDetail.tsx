@@ -2,12 +2,15 @@ import { ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";
 import { EvidenceBlock, type EvidenceVariant } from "@/components/EvidenceBlock";
 import { FixCard } from "@/components/FixCard";
+import { RemediationPanel } from "@/components/RemediationPanel";
+import type { StaticInput } from "@/lib/scan";
 import { SeverityBadge } from "@/components/SeverityBadge";
 import { SourceTag } from "@/components/SourceTag";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatLocation } from "@/lib/findings";
 import type { Evidence, Finding, RuleInfo } from "@/lib/types";
+import { Alert } from "@/components/ui/alert";
 
 const VARIANT: Record<Evidence["kind"], EvidenceVariant> = {
   openapi: "code",
@@ -17,10 +20,11 @@ const VARIANT: Record<Evidence["kind"], EvidenceVariant> = {
 };
 
 const STATUS_NOTE: Record<Finding["status"], string> = {
-  confirmed: "Confirmed by static and runtime evidence.",
+  confirmed:
+    "Observed in the running system (and, if correlated, also found in the spec or config).",
   potential: "Found in the spec or config; not yet confirmed against the running system.",
   inconclusive:
-    "Part of the configuration was not visible (an include or the main config), so this may already be handled elsewhere.",
+    "Not certain: part of the configuration was not visible, or the running system did not show the issue (e.g. a proxy or CDN handles it).",
 };
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -48,9 +52,12 @@ function cweUrl(cwe: string): string {
 export function FindingDetail({
   finding,
   rule,
+  fixSource,
 }: {
   finding: Finding;
   rule: RuleInfo | null | undefined;
+  /** The static input this finding came from, if its content is in memory. */
+  fixSource?: StaticInput | undefined;
 }) {
   return (
     <article aria-labelledby="finding-title" className="flex flex-col gap-6">
@@ -97,6 +104,22 @@ export function FindingDetail({
 
       <Section title="Fix">
         <FixCard remediation={finding.remediation} ruleId={finding.rule_id} />
+        {fixSource && (
+          <>
+            {finding.status === "inconclusive" && (
+              <Alert tone="warning" title="Check before applying">
+                This finding is inconclusive: the setting may already exist somewhere Magen could
+                not see.
+              </Alert>
+            )}
+            <RemediationPanel
+              kind={fixSource.kind}
+              filename={fixSource.filename}
+              content={fixSource.content}
+              findingIds={[finding.id]}
+            />
+          </>
+        )}
         <p className="text-xs text-fg-muted">
           Magen never edits your files. Apply the fix yourself, then retest.
         </p>

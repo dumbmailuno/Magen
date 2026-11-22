@@ -21,6 +21,7 @@ describe("/dev/components", () => {
       "Alert",
       "SummaryStrip, FilterBar & FindingList",
       "FixCard",
+      "DiffView & CompareView",
       "ScanProgress",
       "TargetAllowlistForm & ProbeLog",
       "Skeleton & EmptyState",

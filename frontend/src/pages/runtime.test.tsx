@@ -3,9 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import legacy from "@/test/fixtures/nginx-legacy-tls.json";
+import correlated from "@/test/fixtures/session-correlated.json";
 import { resetRulesCache } from "@/lib/rules";
 import { ScanProvider } from "@/lib/scan";
-import type { Finding, NginxResult, RuntimeScan, Target } from "@/lib/types";
+import type { Finding, NginxResult, RuntimeScan, Session, Target } from "@/lib/types";
 import { FindingsPage } from "./FindingsPage";
 import { NewScanPage } from "./NewScanPage";
 import { TargetsPage } from "./TargetsPage";
@@ -39,6 +40,13 @@ const RUNTIME_FINDING: Finding = {
       response: "HTTP 200\nserver: TestServer/1.2.3",
     },
   ],
+};
+
+const RUNTIME_SESSION: Session = {
+  ...(correlated as Session),
+  inputs: [],
+  runtime_scan_id: 42,
+  findings: [RUNTIME_FINDING],
 };
 
 function scan(
@@ -172,7 +180,7 @@ describe("Runtime scan flow", () => {
 
   it("starts, shows live progress with Stop, then shows runtime findings and the probe log", async () => {
     let polls = 0;
-    routes = (url) => {
+    routes = (url, init) => {
       if (url.endsWith("/api/targets")) return [TARGET];
       if (url.endsWith("/api/scans/runtime")) return scan("running", 0);
       if (url.endsWith("/api/scans/42/audit"))
@@ -186,6 +194,7 @@ describe("Runtime scan flow", () => {
           },
         ];
       if (url.endsWith("/api/scans/42/stop")) return scan("cancelling", 3);
+      if (url.endsWith("/api/sessions") && init.method === "POST") return RUNTIME_SESSION;
       if (url.endsWith("/api/scans/42")) {
         polls += 1;
         return polls < 3
@@ -218,7 +227,8 @@ describe("Runtime scan flow", () => {
 
     const list = await screen.findByRole("listbox", {}, { timeout: 4000 });
     expect(within(list).getByText(/Software version is disclosed/)).toBeInTheDocument();
-    expect(screen.getAllByText("Confirmed").length).toBeGreaterThan(0);
+    const post = calls.find((c) => c.url.endsWith("/api/sessions") && c.init.method === "POST");
+    expect(JSON.parse(post!.init.body as string)).toEqual({ inputs: [], runtime_scan_id: 42 });
     expect(screen.getByText(/Probe log/)).toBeInTheDocument();
     expect(await screen.findByText("(1 requests)", { exact: false })).toBeInTheDocument();
   });

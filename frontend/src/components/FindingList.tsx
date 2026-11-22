@@ -1,3 +1,4 @@
+import { CirclePlus } from "lucide-react";
 import { useRef, type KeyboardEvent } from "react";
 import { SeverityBadge } from "@/components/SeverityBadge";
 import { SourceTag } from "@/components/SourceTag";
@@ -14,10 +15,13 @@ export function FindingList({
   findings,
   selectedId,
   onSelect,
+  newIds,
 }: {
   findings: readonly Finding[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  /** Findings not present in the retest baseline. */
+  newIds?: ReadonlySet<string>;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
   const index = Math.max(
@@ -101,6 +105,12 @@ export function FindingList({
                     {f.rule_id} · {truncateMiddle(loc, 48)}
                   </span>
                   <SourceTag source={f.source} className="shrink-0 px-1 py-0" />
+                  {newIds?.has(f.id) && (
+                    <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-warning">
+                      <CirclePlus aria-hidden className="size-3.5" />
+                      New
+                    </span>
+                  )}
                 </span>
               </span>
               <span className="w-32 shrink-0">

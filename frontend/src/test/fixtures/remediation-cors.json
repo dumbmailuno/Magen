@@ -1,0 +1,33 @@
+{
+  "filename": "cors.conf",
+  "patched_filename": "cors.magen-fixed.conf",
+  "patched_content": "# NGX-CORS-001: wildcard and unvalidated reflection (with credentials).\n# Negatives: reflection through an allowlist map, and reflection guarded by an if.\nevents {}\n\nhttp {\n    server_tokens off;\n    limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;\n\n    map $http_origin $cors_origin {\n        default \"\";\n        \"~^https://app\\.example\\.com$\" $http_origin;\n    }\n\n    server {\n        listen 443 ssl;\n        server_name api.example.com;\n        limit_req zone=api;\n        add_header Strict-Transport-Security \"max-age=31536000\" always;\n        add_header X-Content-Type-Options nosniff always;\n        add_header X-Frame-Options DENY always;\n\n        location /a/ {\n            add_header Strict-Transport-Security \"max-age=31536000\" always;\n            add_header X-Content-Type-Options nosniff always;\n            add_header X-Frame-Options DENY always;\n            add_header Access-Control-Allow-Origin $http_origin always;\n            add_header Access-Control-Allow-Credentials true always;\n        }\n\n        location /b/ {\n            add_header Strict-Transport-Security \"max-age=31536000\" always;\n            add_header X-Content-Type-Options nosniff always;\n            add_header X-Frame-Options DENY always;\n            add_header Access-Control-Allow-Origin \"*\";\n        }\n\n        location /c/ {\n            add_header Strict-Transport-Security \"max-age=31536000\" always;\n            add_header X-Content-Type-Options nosniff always;\n            add_header X-Frame-Options DENY always;\n            add_header Access-Control-Allow-Origin $cors_origin always;\n        }\n\n        location /d/ {\n            add_header Strict-Transport-Security \"max-age=31536000\" always;\n            add_header X-Content-Type-Options nosniff always;\n            add_header X-Frame-Options DENY always;\n            if ($http_origin ~* \"^https://(app|admin)\\.example\\.com$\") {\n                add_header Access-Control-Allow-Origin $http_origin;\n            }\n        }\n    }\n}\n",
+  "diff": "",
+  "fixes": [
+    {
+      "finding_id": "7d5b1f51b916eb29c1bd",
+      "rule_id": "NGX-CORS-001",
+      "title": "CORS reflects any Origin on location /a/ with credentials",
+      "outcome": "template_only",
+      "validated": null
+    },
+    {
+      "finding_id": "ab5dcaee290266c0b1b7",
+      "rule_id": "NGX-CORS-001",
+      "title": "CORS allows any origin (*) on location /b/",
+      "outcome": "template_only",
+      "validated": null
+    }
+  ],
+  "validation": {
+    "parsed": true,
+    "error": null,
+    "resolved": [],
+    "unresolved": [],
+    "introduced": [],
+    "syntax": {
+      "status": "unavailable",
+      "message": "nginx is not installed; validated by re-parsing only"
+    }
+  }
+}

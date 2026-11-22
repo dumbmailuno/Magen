@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/lib/theme";
 import { DevComponentsPage } from "@/pages/DevComponents";
 import { FindingsPage } from "@/pages/FindingsPage";
 import { NewScanPage } from "@/pages/NewScanPage";
-import { ComparePage } from "@/pages/placeholders";
+import { ComparePage } from "@/pages/ComparePage";
 import { TargetsPage } from "@/pages/TargetsPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 
