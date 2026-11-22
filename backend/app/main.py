@@ -5,12 +5,14 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
+import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app import __version__
-from app.api import analyze, meta, remediation, scans, sessions, targets
+from app.ai.service import AiService
+from app.api import ai, analyze, meta, remediation, scans, sessions, targets
 from app.core.config import Settings, get_settings
 from app.core.errors import install_error_handlers
 from app.core.logging import configure_logging
@@ -21,7 +23,10 @@ from app.storage.repositories import ScanRepository
 
 
 def create_app(
-    settings: Settings | None = None, *, scan_manager: ScanManager | None = None
+    settings: Settings | None = None,
+    *,
+    scan_manager: ScanManager | None = None,
+    ai_transport: httpx.AsyncBaseTransport | None = None,
 ) -> FastAPI:
     """Build the app. ``settings`` defaults to environment configuration."""
     settings = settings or get_settings()
@@ -51,6 +56,12 @@ def create_app(
     app.state.settings = settings
     app.state.db = db
     app.state.scans = manager
+    app.state.ai = AiService(
+        db,
+        default_url=settings.ollama_url,
+        default_model=settings.ollama_model,
+        transport=ai_transport,
+    )
 
     install_error_handlers(app)
     app.include_router(meta.router)
@@ -59,6 +70,7 @@ def create_app(
     app.include_router(scans.router)
     app.include_router(remediation.router)
     app.include_router(sessions.router)
+    app.include_router(ai.router)
 
     # Middleware order: the last added runs first (outermost).
     app.add_middleware(SessionTokenMiddleware, token=settings.session_token.get_secret_value())

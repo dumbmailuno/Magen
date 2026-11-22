@@ -88,3 +88,12 @@ class ProbeAudit(Base):
     url: Mapped[str] = mapped_column(Text, nullable=False)
     status_code: Mapped[int | None] = mapped_column(Integer)
     error: Mapped[str | None] = mapped_column(String(200))
+
+
+class AppSetting(Base):
+    """Non-secret user preference (e.g. AI enabled, Ollama model)."""
+
+    __tablename__ = "app_settings"
+
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    value: Mapped[object] = mapped_column(JSON, nullable=False)

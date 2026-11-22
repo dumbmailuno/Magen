@@ -11,7 +11,7 @@ from datetime import UTC, datetime
 from sqlalchemy import select, update
 
 from app.core.errors import NotFoundError, ValidationFailedError
-from app.models.db import FindingRecord, ProbeAudit, Scan, Target
+from app.models.db import AppSetting, FindingRecord, ProbeAudit, Scan, Target
 from app.models.finding import Finding
 from app.runtime.client import AuditEntry
 from app.storage.database import Database
@@ -176,3 +176,34 @@ class ScanRepository:
                 update(Scan).where(Scan.status == "running").values(status="interrupted")
             )
             return int(result.rowcount or 0)  # type: ignore[attr-defined]
+
+
+class SettingsRepository:
+    """Key/value preferences. Never used for secrets."""
+
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def get(self, key: str, default: object = None) -> object:
+        """Stored value or ``default``."""
+        with self.db.session() as s:
+            row = s.get(AppSetting, key)
+            return default if row is None else row.value
+
+    def set(self, key: str, value: object) -> None:
+        """Insert or update."""
+        with self.db.session() as s:
+            row = s.get(AppSetting, key)
+            if row is None:
+                s.add(AppSetting(key=key, value=value))
+            else:
+                row.value = value
+
+
+def update_finding(db: Database, scan_id: int, finding: Finding) -> None:
+    """Replace a stored finding's payload (used to attach AI output; the id never changes)."""
+    with db.session() as s:
+        row = s.get(FindingRecord, (scan_id, finding.id))
+        if row is None:
+            raise NotFoundError("Finding not found in this session")
+        row.payload = finding.model_dump_json()
