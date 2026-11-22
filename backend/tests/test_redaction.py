@@ -75,3 +75,21 @@ def test_json_log_formatter_redacts_message_and_extras() -> None:
     payload = json.loads(line)
     assert "topsecret" not in line
     assert "abc" not in payload["url"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("http://admin:hunter2@api.example.com/v1", f"http://{REDACTED}@api.example.com/v1"),
+        ("see postgres://u:p@db:5432 now", f"see postgres://{REDACTED}@db:5432 now"),
+    ],
+)
+def test_redacts_url_userinfo(raw: str, expected: str) -> None:
+    assert redact_text(raw) == expected
+
+
+@pytest.mark.parametrize(
+    "text", ["https://api.example.com/v1", "mailto:a@b.com", "git@github.com:x/y"]
+)
+def test_keeps_urls_without_credentials(text: str) -> None:
+    assert redact_text(text) == text

@@ -26,6 +26,7 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_vali
 from app.core.redaction import redact_text
 
 RULE_ID_PATTERN: Final = r"^[A-Z]{2,5}-[A-Z]{2,5}-\d{3}$"
+TITLE_MAX_LENGTH: Final = 200
 FINDING_ID_LENGTH: Final = 20
 
 RuleId = Annotated[str, StringConstraints(pattern=RULE_ID_PATTERN)]
@@ -166,7 +167,7 @@ class Finding(_Frozen):
 
     id: Annotated[str, StringConstraints(pattern=rf"^[0-9a-f]{{{FINDING_ID_LENGTH}}}$")]
     rule_id: RuleId
-    title: Annotated[str, StringConstraints(min_length=1, max_length=200)]
+    title: Annotated[str, StringConstraints(min_length=1, max_length=TITLE_MAX_LENGTH)]
     category: Annotated[str, StringConstraints(min_length=1)]
     severity: Severity
     status: FindingStatus
@@ -175,6 +176,12 @@ class Finding(_Frozen):
     references: References = Field(default_factory=References)
     remediation: Remediation = Field(default_factory=Remediation)
     ai_explanation: AiExplanation | None = None
+
+    @field_validator("title")
+    @classmethod
+    def _redact_title(cls, value: str) -> str:
+        # Titles may quote spec content (URLs, names); never let a secret through.
+        return redact_text(value)
 
 
 def _evidence_digest(evidence: Iterable[Evidence]) -> str:

@@ -27,39 +27,34 @@ SENSITIVE_HEADERS: Final = frozenset(
     }
 )
 
-_PATTERNS: Final[tuple[re.Pattern[str], ...]] = (
-    # Authorization: Bearer abc / Basic abc / Token abc
-    re.compile(r"(?i)\b(bearer|basic|token|digest)\s+[A-Za-z0-9\-._~+/]+=*"),
-    # Header lines in raw HTTP excerpts: "Cookie: a=b; c=d"
-    re.compile(
-        r"(?im)^((?:proxy-)?authorization|cookie|set-cookie|x-api-key|api-key|x-auth-token"
-        r"|x-access-token|x-magen-token)\s*:\s*.+$"
+#: (pattern, replacement) pairs, applied in order. Replacements keep the non-secret part
+#: (scheme, header name, key) so redacted evidence stays readable.
+_RULES: Final[tuple[tuple[re.Pattern[str], str], ...]] = (
+    # Authorization: Bearer abc / Basic abc / Token abc  → keep the scheme
+    (re.compile(r"(?i)\b(bearer|basic|token|digest)\s+[A-Za-z0-9\-._~+/]+=*"), rf"\1 {REDACTED}"),
+    # Header lines in raw HTTP excerpts: "Cookie: a=b; c=d"  → keep the header name
+    (
+        re.compile(
+            r"(?im)^((?:proxy-)?authorization|cookie|set-cookie|x-api-key|api-key|x-auth-token"
+            r"|x-access-token|x-magen-token)\s*:\s*.+$"
+        ),
+        rf"\1: {REDACTED}",
     ),
     # key=value / "key": "value" style secrets in query strings, JSON or configs.
     # Same-line only ([ \t], not \s) and the value may not start with { or [ so that schema
     # excerpts like "password:\n  type: string" or '"password": {"type": ...}' are untouched.
-    re.compile(
-        r"(?i)([\"']?(?:api[_-]?key|access[_-]?token|refresh[_-]?token|token|secret|password"
-        r"|passwd|client[_-]?secret)[\"']?[ \t]*[:=][ \t]*[\"']?)([^\s\"'&,;{}\[\]]+)"
+    (
+        re.compile(
+            r"(?i)([\"']?(?:api[_-]?key|access[_-]?token|refresh[_-]?token|token|secret|password"
+            r"|passwd|client[_-]?secret)[\"']?[ \t]*[:=][ \t]*[\"']?)([^\s\"'&,;{}\[\]]+)"
+        ),
+        rf"\1{REDACTED}",
     ),
     # JWTs anywhere
-    re.compile(r"\beyJ[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]{5,}\b"),
+    (re.compile(r"\beyJ[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]{5,}\b"), REDACTED),
+    # Credentials embedded in URLs: scheme://user:password@host  → keep the scheme
+    (re.compile(r"(?i)\b([a-z][a-z0-9+.\-]*://)[^/\s:@]+:[^/\s@]+@"), rf"\1{REDACTED}@"),
 )
-
-
-def _sub(match: re.Match[str]) -> str:
-    text = match.group(0)
-    # Header line: keep the header name.
-    if ":" in text and match.re is _PATTERNS[1]:
-        name = text.split(":", 1)[0]
-        return f"{name}: {REDACTED}"
-    # key=value: keep the key and separator.
-    if match.re is _PATTERNS[2]:
-        return f"{match.group(1)}{REDACTED}"
-    # Scheme + credential: keep the scheme.
-    if match.re is _PATTERNS[0]:
-        return f"{match.group(1)} {REDACTED}"
-    return REDACTED
 
 
 def redact_text(text: str, extra_secrets: tuple[str, ...] = ()) -> str:
@@ -71,8 +66,8 @@ def redact_text(text: str, extra_secrets: tuple[str, ...] = ()) -> str:
     for secret in sorted(extra_secrets, key=len, reverse=True):
         if secret:
             text = text.replace(secret, REDACTED)
-    for pattern in _PATTERNS:
-        text = pattern.sub(_sub, text)
+    for pattern, replacement in _RULES:
+        text = pattern.sub(replacement, text)
     return text
 
 
