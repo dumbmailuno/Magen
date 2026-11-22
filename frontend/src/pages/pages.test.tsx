@@ -73,7 +73,7 @@ beforeEach(() => {
   vi.stubEnv("VITE_MAGEN_API_URL", "http://127.0.0.1:9");
   vi.stubEnv("VITE_MAGEN_TOKEN", "test-token");
   resetRulesCache();
-  mockFetch((url) => (url.endsWith("/api/rules") ? [] : {}));
+  mockFetch((url) => (url.endsWith("/api/rules") || url.endsWith("/api/targets") ? [] : {}));
 });
 
 afterEach(() => {
@@ -89,7 +89,13 @@ describe("FindingsPage", () => {
   });
 
   it("announces progress while running", () => {
-    renderAt("/findings", { phase: "running", inputs: [], current: "petstore.yaml" });
+    renderAt("/findings", {
+      phase: "running",
+      inputs: [],
+      stage: "static",
+      current: "petstore.yaml",
+      runtime: null,
+    });
     expect(screen.getByText("Analyzing petstore.yaml…")).toHaveAttribute("aria-live", "polite");
   });
 
@@ -169,7 +175,8 @@ describe("FindingsPage", () => {
       result: SNIP,
     };
     renderAt("/findings", done([snipOk]));
-    expect(screen.getByText("Some configuration was not visible")).toBeInTheDocument();
+    expect(screen.getByText("Coverage notes")).toBeInTheDocument();
+    expect(screen.getByText(/marked Inconclusive/)).toBeInTheDocument();
     expect(screen.getByText(/snippets\/security-headers.conf \(line 7\)/)).toBeInTheDocument();
     expect(screen.getAllByText("Inconclusive").length).toBeGreaterThan(0);
   });
@@ -185,7 +192,7 @@ describe("NewScanPage", () => {
   it("disables Start until a file is chosen, then analyzes and shows findings", async () => {
     const fetchMock = mockFetch((url) => {
       if (url.endsWith("/api/analyze/openapi")) return OAS;
-      return [];
+      return []; // rules, targets
     });
     render(
       <ScanProvider>

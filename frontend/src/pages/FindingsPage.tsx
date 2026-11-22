@@ -18,11 +18,20 @@ import {
   type Filters,
 } from "@/lib/findings";
 import { useRules } from "@/lib/rules";
-import { useScan, type InputOutcome } from "@/lib/scan";
+import { inputLabel, useScan, type InputOutcome } from "@/lib/scan";
+import { ProbeLog } from "@/components/ProbeLog";
+import { ScanProgress } from "@/components/ScanProgress";
 
 function Coverage({ outcomes, onRetry }: { outcomes: InputOutcome[]; onRetry: () => void }) {
+  const hiddenConfig = outcomes.some(
+    (o) =>
+      o.ok &&
+      "is_snippet" in o.result &&
+      (o.result.is_snippet || o.result.unresolved_includes.length > 0),
+  );
   const failed = outcomes.filter((o): o is Extract<InputOutcome, { ok: false }> => !o.ok);
   const notes = outcomes.flatMap((o) => {
+    if (o.ok && o.input.kind === "runtime" && "notes" in o.result) return o.result.notes;
     if (!o.ok || !("is_snippet" in o.result)) return [];
     const r = o.result;
     const out: string[] = [];
@@ -49,21 +58,25 @@ function Coverage({ outcomes, onRetry }: { outcomes: InputOutcome[]; onRetry: ()
         >
           <ul>
             {failed.map((o) => (
-              <li key={o.input.filename}>
-                <span className="font-mono">{o.input.filename}</span>: {o.error}
+              <li key={inputLabel(o.input)}>
+                <span className="font-mono">{inputLabel(o.input)}</span>: {o.error}
               </li>
             ))}
           </ul>
         </Alert>
       )}
       {notes.length > 0 && (
-        <Alert tone="info" title="Some configuration was not visible">
+        <Alert tone="info" title="Coverage notes">
           <ul>
             {notes.map((n) => (
               <li key={n}>{n}</li>
             ))}
           </ul>
-          <p className="mt-1">Related findings are marked Inconclusive.</p>
+          {hiddenConfig && (
+            <p className="mt-1">
+              Findings that depend on configuration Magen could not see are marked Inconclusive.
+            </p>
+          )}
         </Alert>
       )}
     </>
@@ -71,7 +84,7 @@ function Coverage({ outcomes, onRetry }: { outcomes: InputOutcome[]; onRetry: ()
 }
 
 export function FindingsPage() {
-  const { state, retry } = useScan();
+  const { state, retry, stop } = useScan();
   const rules = useRules();
   const [params, setParams] = useSearchParams();
   const paramString = params.toString();
@@ -113,17 +126,22 @@ export function FindingsPage() {
 
   if (state.phase === "running") {
     return (
-      <>
+      <div className="flex flex-col gap-4">
         <PageHeader title="Findings" />
-        <p role="status" aria-live="polite" className="mb-4 text-base text-fg-muted">
-          Analyzing {state.current}…
-        </p>
+        <ScanProgress
+          stage={state.stage}
+          hasStatic={state.inputs.some((i) => i.kind !== "runtime")}
+          hasRuntime={state.inputs.some((i) => i.kind === "runtime")}
+          current={state.current}
+          runtime={state.runtime}
+          onStop={() => void stop()}
+        />
         <div className="flex flex-col gap-2" aria-hidden>
           {Array.from({ length: 6 }, (_, i) => (
             <Skeleton key={i} className="h-12 w-full" />
           ))}
         </div>
-      </>
+      </div>
     );
   }
 
@@ -144,8 +162,8 @@ export function FindingsPage() {
         >
           <ul>
             {state.outcomes.map((o) => (
-              <li key={o.input.filename}>
-                <span className="font-mono">{o.input.filename}</span>: {o.ok ? "" : o.error}
+              <li key={inputLabel(o.input)}>
+                <span className="font-mono">{inputLabel(o.input)}</span>: {o.ok ? "" : o.error}
               </li>
             ))}
           </ul>
@@ -154,11 +172,15 @@ export function FindingsPage() {
     );
   }
 
-  const sources = state.outcomes.filter((o) => o.ok).map((o) => o.input.filename);
+  const sources = state.outcomes.filter((o) => o.ok).map((o) => inputLabel(o.input));
+  const runtimeScan = state.outcomes.find((o) => o.ok && o.input.kind === "runtime");
+  const runtimeScanId =
+    runtimeScan?.ok && "status" in runtimeScan.result ? runtimeScan.result.id : null;
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Findings" description={`Static analysis of ${sources.join(", ")}`} />
+      <PageHeader title="Findings" description={`Results for ${sources.join(", ")}`} />
       <Coverage outcomes={state.outcomes} onRetry={() => void retry()} />
+      {runtimeScanId !== null && <ProbeLog scanId={runtimeScanId} />}
       {all.length === 0 ? (
         <EmptyState
           icon={CircleCheck}

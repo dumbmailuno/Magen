@@ -31,3 +31,18 @@
     contain-intrinsic-size: auto var(--row-h);
   }
 }
+
+@layer components {
+  /* ScanProgress determinate bar (design-system §8). Width is set from data via CSSOM. */
+  .progress-track {
+    height: var(--space-2);
+    overflow: hidden;
+    border-radius: var(--radius-full);
+    background: var(--color-surface-raised);
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--color-primary);
+    transition: width var(--duration-base) var(--ease-standard);
+  }
+}

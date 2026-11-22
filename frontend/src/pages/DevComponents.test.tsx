@@ -21,6 +21,8 @@ describe("/dev/components", () => {
       "Alert",
       "SummaryStrip, FilterBar & FindingList",
       "FixCard",
+      "ScanProgress",
+      "TargetAllowlistForm & ProbeLog",
       "Skeleton & EmptyState",
     ]) {
       expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();

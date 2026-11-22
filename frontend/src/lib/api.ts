@@ -1,4 +1,14 @@
-import type { ApiErrorBody, Health, NginxResult, OpenApiResult, RuleInfo } from "./types";
+import type {
+  ApiErrorBody,
+  Health,
+  NginxResult,
+  OpenApiResult,
+  ProbeAudit,
+  RuleInfo,
+  RuntimeScan,
+  RuntimeScanRequest,
+  Target,
+} from "./types";
 
 /** Error raised for any non-2xx response, carrying the backend's `{code, message}`. */
 export class ApiError extends Error {
@@ -73,4 +83,16 @@ export const api = {
     request<OpenApiResult>("/api/analyze/openapi", post({ filename, content })),
   analyzeNginx: (filename: string, content: string) =>
     request<NginxResult>("/api/analyze/nginx", post({ filename, content })),
+  targets: () => request<Target[]>("/api/targets"),
+  addTarget: (host: string, isLocal: boolean) =>
+    request<Target>(
+      "/api/targets",
+      post({ host, is_local: isLocal, authorization_confirmed: true }),
+    ),
+  deleteTarget: (id: number) => request<null>(`/api/targets/${id}`, { method: "DELETE" }),
+  startRuntimeScan: (body: RuntimeScanRequest) =>
+    request<RuntimeScan>("/api/scans/runtime", post(body)),
+  scan: (id: number) => request<RuntimeScan>(`/api/scans/${id}`),
+  stopScan: (id: number) => request<RuntimeScan>(`/api/scans/${id}/stop`, { method: "POST" }),
+  audit: (id: number) => request<ProbeAudit[]>(`/api/scans/${id}/audit`),
 };

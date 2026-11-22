@@ -8,6 +8,9 @@ import { FileField } from "@/components/FileField";
 import { FilterBar } from "@/components/FilterBar";
 import { FindingList } from "@/components/FindingList";
 import { FixCard } from "@/components/FixCard";
+import { ProbeLog } from "@/components/ProbeLog";
+import { ScanProgress } from "@/components/ScanProgress";
+import { TargetAllowlistForm } from "@/components/TargetAllowlistForm";
 import { SummaryStrip } from "@/components/SummaryStrip";
 import { Alert } from "@/components/ui/alert";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -267,6 +270,35 @@ export function DevComponentsPage() {
         <FixCard remediation={CRITICAL.remediation} ruleId="NGX-TLS-003" />
         <FixCard remediation={HIGH.remediation} ruleId="NGX-TLS-003" />
         <FixCard remediation={{ template_fix: null, ai_fix: null, validated: false }} ruleId="X" />
+      </Section>
+
+      <Section title="ScanProgress">
+        <ScanProgress
+          stage="static"
+          hasRuntime
+          current="petstore.yaml"
+          runtime={null}
+          onStop={() => undefined}
+        />
+        <ScanProgress
+          stage="runtime"
+          hasRuntime
+          current="https://api.example.com/"
+          runtime={{ scanId: 1, done: 5, total: 13, current: "GET /.git/HEAD", stopping: false }}
+          onStop={() => undefined}
+        />
+        <ScanProgress
+          stage="runtime"
+          hasRuntime
+          current="https://api.example.com/"
+          runtime={{ scanId: 1, done: 6, total: 13, current: "GET /.env", stopping: true }}
+          onStop={() => undefined}
+        />
+      </Section>
+
+      <Section title="TargetAllowlistForm & ProbeLog">
+        <TargetAllowlistForm onAdded={() => undefined} />
+        <ProbeLog scanId={-1} />
       </Section>
 
       <Section title="Skeleton & EmptyState">

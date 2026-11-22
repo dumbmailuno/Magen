@@ -120,3 +120,45 @@ export interface NginxResult {
 }
 
 export type InputKind = "openapi" | "nginx";
+
+/** Mirror of backend app/api/targets.py TargetOut. */
+export interface Target {
+  id: number;
+  host: string;
+  is_local: boolean;
+  authorized_at: string;
+  created_at: string;
+}
+
+export type ScanStatus = "running" | "cancelling" | "done" | "failed" | "cancelled" | "interrupted";
+
+/** Mirror of backend app/api/scans.py ScanOut. */
+export interface RuntimeScan {
+  id: number;
+  status: ScanStatus;
+  target_host: string | null;
+  base_url: string | null;
+  progress: { done: number; total: number; current: string } | null;
+  started_at: string;
+  finished_at: string | null;
+  error: string | null;
+  notes: string[];
+  findings: Finding[];
+}
+
+/** Mirror of backend app/api/scans.py AuditOut. */
+export interface ProbeAudit {
+  sent_at: string;
+  method: string;
+  url: string;
+  status_code: number | null;
+  error: string | null;
+}
+
+export interface RuntimeScanRequest {
+  target_id: number;
+  base_url: string;
+  auth_header?: { name: string; value: string };
+  rate_per_second?: number;
+  request_cap?: number;
+}
