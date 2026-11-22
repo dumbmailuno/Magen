@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 from pydantic import BaseModel
 
+import app.rules.openapi  # noqa: F401  (register rules so /api/rules lists them)
 from app import __version__
 from app.models.finding import References, Severity
 from app.rules.base import RuleTarget

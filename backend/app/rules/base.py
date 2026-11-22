@@ -11,7 +11,17 @@ from abc import ABC, abstractmethod
 from enum import StrEnum
 from typing import ClassVar, Generic, TypeVar
 
-from app.models.finding import Finding, References, Severity
+from app.models.finding import (
+    TITLE_MAX_LENGTH,
+    Evidence,
+    Finding,
+    FindingStatus,
+    References,
+    Remediation,
+    Severity,
+    Source,
+    make_finding,
+)
 
 InputT = TypeVar("InputT")
 
@@ -43,3 +53,31 @@ class Rule(ABC, Generic[InputT]):
     @abstractmethod
     def check(self, document: InputT) -> list[Finding]:
         """Return findings for ``document``. Must be pure and deterministic."""
+
+    def finding(
+        self,
+        evidence: list[Evidence],
+        *,
+        title: str | None = None,
+        status: FindingStatus = FindingStatus.POTENTIAL,
+        source: Source = Source.STATIC,
+    ) -> Finding:
+        """Build a finding carrying this rule's metadata and template fix.
+
+        Static findings default to ``potential``: a spec/config states intent, and only
+        runtime correlation can confirm what the deployed system actually does.
+        """
+        text = title or self.title
+        if len(text) > TITLE_MAX_LENGTH:  # titles quote spec content of arbitrary length
+            text = text[: TITLE_MAX_LENGTH - 1] + "…"
+        return make_finding(
+            rule_id=self.id,
+            title=text,
+            category=self.category,
+            severity=self.severity,
+            status=status,
+            source=source,
+            evidence=evidence,
+            references=self.references,
+            remediation=Remediation(template_fix=self.remediation_template),
+        )
