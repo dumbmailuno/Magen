@@ -18,7 +18,9 @@ Roadmap week 1–2 (scaffold): finding schema, SQLite + migrations, FastAPI skel
 session-token auth, Electron shell, design tokens, base components, `/dev/components`, CI.
 Roadmap week 3–4: OpenAPI parser + 10 rules (`API-OAS-001`…`010`, see
 [`docs/rules.md`](docs/rules.md)) and labelled corpus v1. Week 5–6: Nginx parser + 11 rules (`NGX-*`) and the findings UI — pick a spec and/or
-config under **New scan**, review results under **Findings**.
+config under **New scan**, review results under **Findings**. Week 7–8: runtime probes —
+allowlist a host under **Targets** (authorization required), then add a live base URL to a scan.
+Safety guarantees: [`docs/threat-model.md`](docs/threat-model.md).
 
 ## Layout
 

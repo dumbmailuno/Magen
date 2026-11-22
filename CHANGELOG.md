@@ -2,6 +2,17 @@
 
 ## 0.1.0 — unreleased
 
+- Runtime analysis (roadmap wk 7–8): allowlist API (authorization confirmation + timestamp),
+  safety core (host normalisation, IP validation incl. metadata block, DNS-rebinding-proof
+  IP pinning, same-host redirects ≤ 3, safe methods only, global ≤ 5 req/s + per-scan rate,
+  request cap, timeouts, body cap), SafeHttpClient, TLS handshakes, fixed probe plan,
+  11 runtime rules (API-RT-*), scan manager with Stop and audit log, recorded-observation
+  runtime corpus (4 files, 16 findings). Adds httpx (runtime) and trustme (tests).
+- Runtime UI: Targets page (allowlist form with required authorization checkbox), Live API
+  section on New Scan (target, base URL, in-memory auth header, rate, cap), ScanProgress with
+  determinate bar, live text and Stop, coverage notes and a ProbeLog of every request sent.
+  Cancelled in-flight requests are audited too. Design system 0.3.0 (ProbeLog).
+
 - Findings UI (roadmap wk 5–6): New Scan (OpenAPI + Nginx file inputs, local 5 MB check),
   Findings page with summary strip, URL-persisted filters, keyboard listbox, finding detail
   (evidence → why it matters → fix → references), FixCard copy/export (no apply), loading /

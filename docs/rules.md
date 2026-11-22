@@ -53,6 +53,17 @@ stock `mime.types` / `*_params` files), which Magen never follows.
 | NGX-TLS-002 | Weak cipher suites are enabled | high | nginx | API8:2023 | CWE-327 | active |
 | NGX-TLS-003 | HSTS header is not sent | medium | nginx | API8:2023 | CWE-319 | active |
 | NGX-TLS-004 | Server accepts plain HTTP without redirecting to HTTPS | medium | nginx | API8:2023 | CWE-319 | active |
+| API-RT-001 | API responds over plain HTTP | medium | runtime | API8:2023 | CWE-319 | active |
+| API-RT-002 | Server accepts obsolete TLS versions | high | runtime | API8:2023 | CWE-326 | active |
+| API-RT-003 | TLS certificate is not trusted | high | runtime | API8:2023 | CWE-295 | active |
+| API-RT-004 | HTTPS response does not send HSTS | medium | runtime | API8:2023 | CWE-319 | active |
+| API-RT-005 | Response is missing security headers | low | runtime | API8:2023 | CWE-693 | active |
+| API-RT-006 | Software version is disclosed | low | runtime | API8:2023 | CWE-200 | active |
+| API-RT-007 | CORS allows any origin | medium | runtime | API8:2023 | CWE-942 | active |
+| API-RT-008 | Error response exposes a stack trace | medium | runtime | API8:2023 | CWE-209 | active |
+| API-RT-009 | Repository or environment file is publicly readable | high | runtime | API8:2023 | CWE-538 | active |
+| API-RT-010 | Status or debug endpoint is publicly reachable | medium | runtime | API8:2023, API9:2023 | CWE-200 | active |
+| API-RT-011 | TRACE method is advertised | low | runtime | API8:2023 | — | active |
 
 `tests/test_rules_docs.py` fails if this table and the registry disagree.
 
@@ -141,6 +152,35 @@ with no `deny all`, `auth_basic`, `auth_request` or `internal` in its chain and 
 
 **NGX-RL-001 — No rate limiting.** Servers exist but no `limit_req` anywhere
 (`limit_req_zone` alone does nothing). One finding at the `http` block.
+
+### Runtime rule details
+
+Runtime rules are pure functions over recorded probe observations (`app/runtime/observations.py`);
+the network lives only in `app/runtime/`. Directly observed issues are `confirmed`.
+Evidence: `location.url` + `pointer: probe:<id>`; the hashed `excerpt` is the stable fact
+(e.g. `Server: nginx/1.18.0`), full redacted request/response are attached but excluded
+from the id.
+
+**Probe plan** (fixed order, ≤ 13 requests): `base-get` (GET base URL with
+`Origin: https://magen-cors-probe.invalid`), `base-options` (OPTIONS, preflight headers),
+`not-found` (GET `/magen-probe-not-found-7f3a`), `plain-http` (GET `http://host/`, https
+targets only, no credentials), six well-known paths (`/.git/HEAD`, `/.env` — body masked to
+`KEY=••••` at capture —, `/nginx_status`, `/server-status`, `/actuator`, `/phpinfo.php`),
+then TLS: one verifying handshake and one each limited to TLS 1.0 / 1.1.
+
+| Rule | Fires when |
+|---|---|
+| `API-RT-001` | `plain-http` (or an `http://` base URL) returns content, not a redirect to `https://` |
+| `API-RT-002` | a TLS 1.0/1.1-only handshake succeeds (client-side refusal = not tested, never "refused") |
+| `API-RT-003` | the verifying handshake fails (expired, self-signed, untrusted, name mismatch) |
+| `API-RT-004` | the HTTPS base response lacks HSTS with `max-age > 0` |
+| `API-RT-005` | the base response lacks `nosniff` and/or `X-Frame-Options` / CSP `frame-ancestors` |
+| `API-RT-006` | `Server` contains a version number, or `X-Powered-By` / `X-AspNet(Mvc)-Version` present |
+| `API-RT-007` | `Access-Control-Allow-Origin` is `*` or echoes the probe origin (title notes credentials) |
+| `API-RT-008` | a stack-trace / debug-page signature appears in the not-found or base body |
+| `API-RT-009` | `/.git/HEAD` → 200 with git ref content, or `/.env` → 200 with ≥ 2 `KEY=` lines |
+| `API-RT-010` | a status path → 200 **with** its content marker (`Active connections:`, `Server Status`, `"_links"`, `PHP Version`) — SPA fallbacks don't count |
+| `API-RT-011` | the OPTIONS `Allow` header lists TRACE or TRACK (Magen never sends them) |
 
 ## Parser guarantees
 

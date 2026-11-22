@@ -49,6 +49,22 @@ intentionally vulnerable apps (crAPI, VAmPI, OWASP Juice Shop) run locally via D
 expected findings, 21 rules. Same labelling procedure and validity caveats as above; Nginx
 also matched on first comparison (including expected status).
 
+### Corpus v1 (2026-11-22) — Runtime (recorded observations)
+
+Runtime fixtures are recorded, redacted probe observations (`app/runtime/recording.py`)
+replayed through the runtime rules: deterministic and network-free, so they run in CI. Live
+targets (VAmPI, crAPI, Juice Shop in Docker) are for the evaluation milestone; their scans
+can be recorded into this format and replayed.
+
+| File | Kind | Expected | Exercises |
+|---|---|---|---|
+| `hardened-api.json` | clean | 0 | good headers, https redirect, SPA fallback on `/server-status` (no marker), TLS 1.0 refused / 1.1 not testable |
+| `legacy-server.json` | vulnerable | 9 | RT-001…008, RT-011 |
+| `exposed-files.json` | vulnerable | 4 | RT-009 (.git, masked .env), RT-010 (stub_status, actuator) |
+| `local-http-lab.json` | tricky | 3 | VAmPI-style `http://localhost` lab: RT-001, RT-005, RT-006; HSTS correctly not applicable |
+
+16 expected findings. Corpus v1 total: 20 files, 60 expected findings, 32 rules.
+
 **Labelling procedure.** Single labeller (the author). Each file was written to target
 specific rules; expected `(rule_id, pointer, status)` tuples were written from the rule
 definitions in `docs/rules.md` *before* running the analyzer, then compared. Corpus v1
@@ -77,6 +93,9 @@ inter-rater agreement reported; (2) borderline-case analysis per rule.
 | NGX-CFG-002 | `/metrics` or `/debug` protected by a firewall/network policy outside nginx |
 | NGX-RL-001 | Rate limiting in a gateway/WAF in front of nginx |
 | All "missing" Nginx rules | Settings in included files (mitigated: reported as `inconclusive`) |
+| API-RT-003 | Local lab targets with self-signed certificates (expected; severity stays high for production hosts) |
+| API-RT-005, API-RT-004 | JSON-only APIs where browser headers matter less (still recommended) |
+| API-RT-008 | Signatures inside legitimate content (e.g. a docs page quoting a traceback) |
 
 ## Metrics
 

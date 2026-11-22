@@ -57,6 +57,28 @@ api/  (thin routers)  →  services  →  rules/, static/, runtime/, correlation
 Evidence text and URLs are **redacted on construction**, so no code path can store or export
 an unredacted credential through a `Finding`.
 
+## Runtime scans
+
+```
+POST /api/scans/runtime ─► ScanManager.start (validate target + host, clamp rate/cap)
+        │                     └─ asyncio task ─► probes.collect ─► SafeHttpClient / tls.py
+        │                                              │ every request: method guard → same-host →
+        │                                              │ resolve + validate all IPs → budget →
+        │                                              │ global + scan rate limit → connect to IP
+        │                                              │ (Host/SNI = name) → redact → audit row
+        │                                              ▼
+        │                                     RuntimeObservations (redacted, in memory)
+        │                                              ▼
+        │                                     API-RT-* rules (pure) ─► findings (confirmed)
+GET  /api/scans/{id}        progress {done,total,current} / findings when finished
+POST /api/scans/{id}/stop   task.cancel() → in-flight request aborted, partial findings kept
+GET  /api/scans/{id}/audit  every probe sent
+```
+
+The user's auth header exists only in the `ScanJob`'s `AuthHeader` (`SecretStr`) for the
+lifetime of the task. Scans left `running` by a crashed process are marked `interrupted`
+on startup.
+
 ## Storage
 
 Tables: `targets` (allowlist + authorization timestamp), `scans` (version, commit, options),
