@@ -1,0 +1,334 @@
+{
+  "$defs": {
+    "AiExplanation": {
+      "additionalProperties": false,
+      "description": "AI-generated explanation, with provenance (CLAUDE.md \u00a78). Always labelled in the UI.",
+      "properties": {
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "prompt_version": {
+          "title": "Prompt Version",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "model",
+        "prompt_version",
+        "generated_at"
+      ],
+      "title": "AiExplanation",
+      "type": "object"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "description": "One piece of evidence. All text fields are redacted on construction.",
+      "properties": {
+        "excerpt": {
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EvidenceKind"
+        },
+        "location": {
+          "$ref": "#/$defs/Location"
+        },
+        "request": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request"
+        },
+        "response": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Response"
+        }
+      },
+      "required": [
+        "kind",
+        "location",
+        "excerpt"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "EvidenceKind": {
+      "description": "Type of evidence artefact.",
+      "enum": [
+        "openapi",
+        "nginx",
+        "http",
+        "tls"
+      ],
+      "title": "EvidenceKind",
+      "type": "string"
+    },
+    "FindingStatus": {
+      "description": "Certainty of a finding, set by the correlation engine.",
+      "enum": [
+        "confirmed",
+        "potential",
+        "inconclusive"
+      ],
+      "title": "FindingStatus",
+      "type": "string"
+    },
+    "Location": {
+      "additionalProperties": false,
+      "description": "Where evidence lives: a file position, a JSON pointer, and/or a URL.",
+      "properties": {
+        "end_line": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End Line"
+        },
+        "file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "File"
+        },
+        "line": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Line"
+        },
+        "pointer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pointer"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "title": "Location",
+      "type": "object"
+    },
+    "References": {
+      "additionalProperties": false,
+      "description": "Standards mapping. Every rule maps to OWASP API Top 10 (2023) and a CWE if one fits.",
+      "properties": {
+        "cwe": {
+          "items": {
+            "pattern": "^CWE-\\d+$",
+            "type": "string"
+          },
+          "title": "Cwe",
+          "type": "array"
+        },
+        "links": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Links",
+          "type": "array"
+        },
+        "owasp_api": {
+          "items": {
+            "pattern": "^API(10|[1-9]):2023$",
+            "type": "string"
+          },
+          "title": "Owasp Api",
+          "type": "array"
+        }
+      },
+      "title": "References",
+      "type": "object"
+    },
+    "Remediation": {
+      "additionalProperties": false,
+      "description": "Suggested fix. Magen never writes to user files (Option B).",
+      "properties": {
+        "ai_fix": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ai Fix"
+        },
+        "template_fix": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Template Fix"
+        },
+        "validated": {
+          "default": false,
+          "title": "Validated",
+          "type": "boolean"
+        }
+      },
+      "title": "Remediation",
+      "type": "object"
+    },
+    "Severity": {
+      "description": "Finding severity, lowest to highest.",
+      "enum": [
+        "info",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "Source": {
+      "description": "Where the evidence for a finding came from.",
+      "enum": [
+        "static",
+        "runtime",
+        "correlated"
+      ],
+      "title": "Source",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A single deterministic finding produced by a rule (or the correlation engine).",
+  "properties": {
+    "ai_explanation": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AiExplanation"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "category": {
+      "minLength": 1,
+      "title": "Category",
+      "type": "string"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/Evidence"
+      },
+      "minItems": 1,
+      "title": "Evidence",
+      "type": "array"
+    },
+    "id": {
+      "pattern": "^[0-9a-f]{20}$",
+      "title": "Id",
+      "type": "string"
+    },
+    "references": {
+      "$ref": "#/$defs/References"
+    },
+    "remediation": {
+      "$ref": "#/$defs/Remediation"
+    },
+    "rule_id": {
+      "pattern": "^[A-Z]{2,5}-[A-Z]{2,5}-\\d{3}$",
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "severity": {
+      "$ref": "#/$defs/Severity"
+    },
+    "source": {
+      "$ref": "#/$defs/Source"
+    },
+    "status": {
+      "$ref": "#/$defs/FindingStatus"
+    },
+    "title": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "rule_id",
+    "title",
+    "category",
+    "severity",
+    "status",
+    "source",
+    "evidence"
+  ],
+  "title": "Finding",
+  "type": "object"
+}

@@ -1,0 +1,58 @@
+[project]
+name = "magen"
+version = "0.1.0"
+description = "Magen — AI-assisted API security misconfiguration detection & remediation (backend)"
+requires-python = ">=3.11"
+dependencies = [
+  # Web API (bound to 127.0.0.1 only)
+  "fastapi>=0.115,<1",
+  "uvicorn>=0.32,<1",
+  # Schemas / settings
+  "pydantic>=2.9,<3",
+  "pydantic-settings>=2.6,<3",
+  # Storage
+  "sqlalchemy>=2.0.36,<3",
+  "alembic>=1.14,<2",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3",
+  "pytest-cov>=6.0",
+  "httpx>=0.28",          # required by FastAPI TestClient
+  "ruff>=0.8",
+  "mypy>=1.13",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "N", "S", "BLE", "A", "C4", "SIM", "RUF", "T20"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106"]
+"app/storage/migrations/**" = ["N999"]
+
+[tool.mypy]
+strict = true
+python_version = "3.11"
+plugins = ["pydantic.mypy"]
+files = ["app"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.coverage.run]
+source = ["app"]
+branch = true
