@@ -258,3 +258,67 @@ class TestSessions:
         body = post_session(client, runtime_scan_id=scan_id)
         assert {x["source"] for x in body["findings"]} == {"runtime"}
         assert len(body["findings"]) == 4
+
+
+def test_config_fixed_but_still_observed_live_persists(client: TestClient) -> None:
+    """Fixing nginx.conf without redeploying must not count as resolved."""
+    scan_id = _runtime_scan(client, "runtime/legacy-server.json", "legacy.example.com")
+    original = read("nginx/legacy-tls.conf")
+    first = post_session(
+        client,
+        inputs=[{"kind": "nginx", "filename": "l.conf", "content": original}],
+        runtime_scan_id=scan_id,
+    )
+    fixed = client.post(
+        "/api/remediation/preview",
+        json={"kind": "nginx", "filename": "l.conf", "content": original},
+    ).json()["patched_content"]
+    second = post_session(
+        client,
+        inputs=[{"kind": "nginx", "filename": "l.conf", "content": fixed}],
+        runtime_scan_id=scan_id,  # same live system: nothing was redeployed
+        baseline_id=first["id"],
+    )
+    cmp = second["comparison"]
+    # NGX-TLS-002 (ciphers) had no runtime link: genuinely resolved in config.
+    assert [x["rule_id"] for x in cmp["resolved"]] == ["NGX-TLS-002"]
+    # TLS-001 / TLS-003 were confirmed live; the live server still shows them.
+    assert sorted(x["rule_id"] for x in cmp["still_observed"]) == ["API-RT-002", "API-RT-004"]
+    assert {x["rule_id"] for x in cmp["new"]} == set()
+    assert cmp["remediation_rate"] == pytest.approx(1 / 10)
+
+
+def test_retesting_the_exported_copy_matches_the_original_file(client: TestClient) -> None:
+    original = read("nginx/legacy-tls.conf")
+    first = post_session(
+        client, inputs=[{"kind": "nginx", "filename": "legacy-tls.conf", "content": original}]
+    )
+    only_protocols = original.replace("SSLv3 TLSv1 TLSv1.2", "TLSv1.2 TLSv1.3")
+    second = post_session(
+        client,
+        inputs=[
+            {"kind": "nginx", "filename": "legacy-tls.magen-fixed.conf", "content": only_protocols}
+        ],
+        baseline_id=first["id"],
+    )
+    cmp = second["comparison"]
+    assert [x["rule_id"] for x in cmp["resolved"]] == ["NGX-TLS-001"]
+    assert sorted(x["rule_id"] for x in cmp["persists"]) == ["NGX-TLS-002", "NGX-TLS-003"]
+    assert cmp["new"] == []
+    assert cmp["changed_inputs"] == ["legacy-tls.conf"]
+
+
+@pytest.mark.parametrize(
+    ("name", "canonical"),
+    [
+        ("nginx.magen-fixed.conf", "nginx.conf"),
+        ("dir/api.magen-fixed.yaml", "dir/api.yaml"),
+        ("Makefile.magen-fixed", "Makefile"),
+        ("magen-fixed.conf", "magen-fixed.conf"),
+        ("a.magen-fixed.b.conf", "a.magen-fixed.b.conf"),
+    ],
+)
+def test_canonical_filename(name: str, canonical: str) -> None:
+    from app.retest.compare import canonical_filename
+
+    assert canonical_filename(name) == canonical

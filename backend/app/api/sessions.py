@@ -10,7 +10,7 @@ from fastapi import APIRouter, Request
 from pydantic import BaseModel, Field
 
 from app.models.finding import Finding
-from app.retest.compare import Comparison, compare
+from app.retest.compare import Comparison, canonical_filename, compare
 from app.retest.sessions import StaticInput, create_session, require_session
 from app.static.openapi.loader import MAX_BYTES
 from app.storage.repositories import ScanRepository
@@ -75,6 +75,8 @@ class ComparisonOut(BaseModel):
     new: list[Finding]
     status_changes: list[StatusChangeOut]
     remediation_rate: float | None
+    #: Fixed in config/spec but still observed by the runtime probes (not redeployed?).
+    still_observed: list[Finding]
     #: Inputs (by file name) whose content hash differs between the two sessions.
     changed_inputs: list[str]
 
@@ -112,7 +114,9 @@ def _repo(request: Request) -> ScanRepository:
 
 def _input_hashes(repo: ScanRepository, session_id: int) -> dict[str, str]:
     options: dict[str, Any] = repo.get(session_id).options or {}
-    return {str(i["filename"]): str(i["sha256"]) for i in options.get("inputs", [])}
+    return {
+        canonical_filename(str(i["filename"])): str(i["sha256"]) for i in options.get("inputs", [])
+    }
 
 
 def _comparison(repo: ScanRepository, baseline_id: int, current_id: int) -> ComparisonOut:
@@ -138,6 +142,7 @@ def _comparison(repo: ScanRepository, baseline_id: int, current_id: int) -> Comp
             for s in c.status_changes
         ],
         remediation_rate=c.remediation_rate,
+        still_observed=c.still_observed,
         changed_inputs=changed,
     )
 
