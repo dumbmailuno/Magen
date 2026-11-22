@@ -1,4 +1,7 @@
 import type {
+  AiExplainResult,
+  AiFixResult,
+  AiStatus,
   ApiErrorBody,
   Health,
   NginxResult,
@@ -109,6 +112,22 @@ export const api = {
   session: (id: number) => request<Session>(`/api/sessions/${id}`),
   compare: (base: number, head: number) =>
     request<Comparison>(`/api/sessions/compare?base=${base}&head=${head}`),
+  aiStatus: () => request<AiStatus>("/api/ai/status"),
+  aiSettings: (body: { enabled?: boolean; url?: string; model?: string }) =>
+    request<AiStatus>("/api/ai/settings", { method: "PUT", body: JSON.stringify(body) }),
+  aiPull: (model?: string) => request<AiStatus>("/api/ai/pull", post(model ? { model } : {})),
+  aiExplain: (sessionId: number, findingId: string, force = false) =>
+    request<AiExplainResult>(
+      "/api/ai/explain",
+      post({ session_id: sessionId, finding_id: findingId, force }),
+    ),
+  aiFix: (body: {
+    session_id: number;
+    finding_id: string;
+    kind: InputKind;
+    filename: string;
+    content: string;
+  }) => request<AiFixResult>("/api/ai/fix", post(body)),
   remediationPreview: (body: {
     kind: InputKind;
     filename: string;

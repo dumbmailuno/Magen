@@ -213,6 +213,19 @@ export function DevComponentsPage() {
         />
         <AiPanel state="unavailable" fallback={FALLBACK} />
         <AiPanel
+          state="unavailable"
+          unavailableMessage="Model qwen3:4b is not installed."
+          fallback={FALLBACK}
+        />
+        <AiPanel
+          state="ready"
+          text="The spec declares an http:// server."
+          model="qwen3:4b@abcdef012345"
+          promptVersion="explain-v1"
+          injectionSuspected
+          fallback={FALLBACK}
+        />
+        <AiPanel
           state="error"
           errorMessage="model output failed validation"
           fallback={FALLBACK}

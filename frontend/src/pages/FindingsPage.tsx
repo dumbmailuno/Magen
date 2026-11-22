@@ -344,6 +344,7 @@ export function FindingsPage() {
                     finding={selected}
                     rule={rules === null ? undefined : (rules.get(selected.rule_id) ?? null)}
                     fixSource={sourceFor(selected, statics)}
+                    sessionId={session.id}
                   />
                 )}
               </div>

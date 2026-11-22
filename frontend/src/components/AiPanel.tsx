@@ -18,6 +18,10 @@ export interface AiPanelProps {
   /** Deterministic template explanation, shown when AI is unavailable or failed. */
   fallback: string;
   errorMessage?: string;
+  /** Why AI is unavailable (AI off, Ollama not running, model missing, downloading). */
+  unavailableMessage?: string;
+  /** The scanned content looks like it addresses an AI: warn the reader. */
+  injectionSuspected?: boolean;
   onRegenerate?: () => void;
   onExpand?: () => void;
 }
@@ -33,6 +37,8 @@ export function AiPanel({
   promptVersion,
   fallback,
   errorMessage,
+  unavailableMessage,
+  injectionSuspected = false,
   onRegenerate,
   onExpand,
 }: AiPanelProps) {
@@ -46,7 +52,7 @@ export function AiPanel({
         <div className="mb-2 flex items-center gap-2 text-sm text-fg-muted">
           <TriangleAlert aria-hidden className="size-4 text-warning" />
           {state === "unavailable"
-            ? "AI explanation unavailable — Ollama is not running. Start Ollama to enable AI explanations."
+            ? `AI explanation unavailable — ${unavailableMessage ?? "Ollama is not running. Start Ollama to enable AI explanations."}`
             : `AI explanation failed${errorMessage ? `: ${errorMessage}` : ""}. Showing the template explanation.`}
         </div>
         <p className="text-base text-fg">{fallback}</p>
@@ -110,6 +116,13 @@ export function AiPanel({
             <p className="whitespace-pre-wrap text-base text-fg">{text ?? fallback}</p>
           )}
         </div>
+        {injectionSuspected && state === "ready" && (
+          <p role="note" className="mt-3 flex items-start gap-2 text-sm text-warning">
+            <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+            The scanned content contains text that looks like instructions to an AI. It was treated
+            as data, but read this explanation with extra care.
+          </p>
+        )}
         <p className="mt-3 flex flex-wrap items-center gap-x-2 text-xs text-ai">
           <span className="font-medium">{AI_CAPTION}</span>
           {model && <span className="text-fg-muted">· {model}</span>}

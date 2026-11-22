@@ -1,3 +1,4 @@
+import { AiSettings } from "@/components/AiSettings";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useTheme, type Density, type ThemePreference } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -73,6 +74,9 @@ export function SettingsPage() {
         <h2 className="mb-4 text-lg font-semibold">Appearance</h2>
         <AppearanceControls />
       </section>
+      <div className="mt-6">
+        <AiSettings />
+      </div>
     </>
   );
 }

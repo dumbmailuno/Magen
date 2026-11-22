@@ -244,3 +244,51 @@ export interface RemediationPreview {
     syntax: { status: string; message: string };
   };
 }
+
+/** Mirror of backend app/api/ai.py. */
+export type AiState = "disabled" | "not_running" | "model_missing" | "downloading" | "ready";
+
+export interface AiStatus {
+  state: AiState;
+  enabled: boolean;
+  url: string;
+  model: string;
+  version: string | null;
+  models: string[];
+  pull: {
+    model: string;
+    status: string;
+    percent: number | null;
+    error: string | null;
+    done: boolean;
+  } | null;
+}
+
+export interface AiExplainResult {
+  state: "ready" | "unavailable" | "error";
+  message: string | null;
+  fallback: string;
+  injection_suspected: boolean;
+  cached: boolean;
+  finding: Finding;
+}
+
+export interface AiFixResult {
+  state: "ready" | "unavailable" | "error";
+  message: string | null;
+  fallback: string;
+  injection_suspected: boolean;
+  explanation: string | null;
+  diff: string;
+  patched_content: string;
+  patched_filename: string;
+  validated: boolean;
+  validation: {
+    parsed: boolean;
+    error: string | null;
+    introduced: Finding[];
+    syntax: { status: string; message: string };
+  } | null;
+  model: string;
+  prompt_version: string;
+}

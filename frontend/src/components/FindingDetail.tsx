@@ -2,6 +2,8 @@ import { ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";
 import { EvidenceBlock, type EvidenceVariant } from "@/components/EvidenceBlock";
 import { FixCard } from "@/components/FixCard";
+import { AiExplanation } from "@/components/AiExplanation";
+import { AiFixPanel } from "@/components/AiFixPanel";
 import { RemediationPanel } from "@/components/RemediationPanel";
 import type { StaticInput } from "@/lib/scan";
 import { SeverityBadge } from "@/components/SeverityBadge";
@@ -53,9 +55,12 @@ export function FindingDetail({
   finding,
   rule,
   fixSource,
+  sessionId,
 }: {
   finding: Finding;
   rule: RuleInfo | null | undefined;
+  /** Session the finding is stored in (enables the AI assistant). */
+  sessionId?: number | undefined;
   /** The static input this finding came from, if its content is in memory. */
   fixSource?: StaticInput | undefined;
 }) {
@@ -100,6 +105,13 @@ export function FindingDetail({
             {rule?.description ?? "Rule description unavailable."}
           </p>
         )}
+        {sessionId !== undefined && (
+          <AiExplanation
+            sessionId={sessionId}
+            finding={finding}
+            fallback={`${rule?.description ?? finding.title}\n\nRecommended fix:\n${finding.remediation.template_fix ?? ""}`}
+          />
+        )}
       </Section>
 
       <Section title="Fix">
@@ -118,6 +130,9 @@ export function FindingDetail({
               content={fixSource.content}
               findingIds={[finding.id]}
             />
+            {sessionId !== undefined && (
+              <AiFixPanel sessionId={sessionId} findingId={finding.id} source={fixSource} />
+            )}
           </>
         )}
         <p className="text-xs text-fg-muted">

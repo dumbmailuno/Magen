@@ -155,7 +155,9 @@ Built on shadcn/ui primitives, restyled via tokens. Prefer composing shadcn; add
 | **SeverityBadge** | critical/high/medium/low/info | Icon + label + tint bg. Never color-only. |
 | **StatusBadge** | confirmed/potential/inconclusive | Solid / outline / dashed. |
 | **SourceTag** | static/runtime/correlated | Icon + label. |
-| **AiPanel** | collapsed, loading, ready, unavailable, error | `ai` tint, sparkles icon, caption, regenerate, "copy". Unavailable → shows deterministic template explanation + "Start Ollama" hint. |
+| **AiPanel** | collapsed, loading, ready, unavailable, error; injection warning | `ai` tint, sparkles icon, caption with model@digest + prompt version, regenerate, copy. Unavailable → deterministic template explanation + the reason (AI off / Ollama not running / model missing / downloading). If the scanned content looks like it addresses an AI, a warning line is shown inside the panel. |
+| **AiFixPanel** | idle, generating, ready (validated / not validated), unavailable, error | AI tint and caption; shows the model's one-line rationale, DiffView, Validated / Not validated (same validator as template fixes), export corrected copy. Never applied. |
+| **AiSettings** | disabled, not running, model missing, downloading (progress), ready | Settings section: status with icon + text, enable switch, model name, Ollama URL (loopback only), Download model, Check again. States that no data leaves the machine. |
 | **FindingRow** | default, hover, selected, resolved (retest) | Columns: severity, title, rule id, location, status, source. |
 | **FindingTable** | sortable, filterable, empty, loading (skeleton), error | Implemented as `FindingList`: a `listbox` with roving focus (↑/↓/Home/End, selection follows focus). Rows use `content-visibility: auto` so 10 000 rows stay cheap without a virtualization dependency. Filters persist in the URL (`?sev=&status=&source=&f=`). |
 | **EvidenceBlock** | code, request/response, config excerpt | Mono, line numbers, highlighted lines, copy, redacted tokens shown as `••••`. |
@@ -227,4 +229,4 @@ Default · loading (skeleton) · empty · error (with retry) · partial (some pr
 - A Storybook (or `/dev/components` route) renders every component × state × theme × density for visual review and screenshots for the thesis.
 - Visual changes that alter tokens bump the design-system version in this file's header and are noted in `CHANGELOG.md`.
 
-*Design system version: 0.4.0*
+*Design system version: 0.5.0*
