@@ -79,6 +79,53 @@ The user's auth header exists only in the `ScanJob`'s `AuthHeader` (`SecretStr`)
 lifetime of the task. Scans left `running` by a crashed process are marked `interrupted`
 on startup.
 
+## Correlation (`app/correlation/engine.py`)
+
+A fixed link table pairs runtime rules with static rules describing the same issue
+(e.g. `API-RT-004` HSTS missing ⇄ `NGX-TLS-003`; `API-RT-002` legacy TLS ⇄ `NGX-TLS-001`;
+`API-RT-001` plain HTTP ⇄ `API-OAS-001`, `NGX-TLS-004`). A static finding is compared with
+runtime results only when it **applies to the probed target**:
+
+* Nginx: the server block nginx would use for the target host (explicit `server_name`,
+  else an explicit catch-all; for IP targets nginx's default server), on the right listener
+  (TLS server for HSTS/TLS links, plaintext for redirect links), and every enclosing
+  `location` must cover the probed path. Status locations map to their own probe
+  (`/nginx_status` ⇄ `path-nginx-status`).
+* OpenAPI: `API-OAS-001`'s server URL host must be the target; spec-wide rules need the
+  target among the absolute server hosts (or none declared).
+
+| Static | Runtime on that scope | Result |
+|---|---|---|
+| issue | same issue observed | **confirmed**, source `correlated`, static + runtime evidence, **static id kept** |
+| issue | probe ran, issue not observed | **inconclusive**, source `correlated`, contradicting evidence attached, title "— not observed at runtime" (not for links marked non-refuting, e.g. spec debug fields vs one clean 404) |
+| issue | not tested / out of scope | unchanged |
+| — | observed | **confirmed**, source `runtime` |
+
+## Remediation (`app/remediation/`) — Option B
+
+Fixers turn a finding into **line edits against the user's original text** (comments and
+formatting preserved). Insertions go before a block's closing `}` so sibling pointers are
+unchanged; adding the first `add_header` to a block copies the inherited set (nginx would
+otherwise drop it). Edits are applied bottom-up; overlapping edits mark that finding as a
+conflict rather than half-applying it. Diffs come from `difflib`.
+
+Validation: re-parse; re-run all rules on the patched text; a fix is **validated** only if
+its finding (matched by rule + structural pointer) is gone and **no new finding** appears;
+`nginx -t` (test mode only, temp dir, 10 s timeout) when installed — judged against the
+original, since real configs reference certificates/includes that are not present.
+Contract-changing fixes (auth scheme, OAuth flow, parameter location, CORS origin) stay
+template-only. The corrected copy is named `*.magen-fixed.*`; nothing is written to disk.
+
+## Retest (`app/retest/`)
+
+`POST /api/sessions` analyses the static inputs, correlates them with a finished runtime
+scan (from its recorded observations) and persists findings, input names and SHA-256 —
+never contents. Comparison with a baseline session matches by id, then rule + structural
+location (`*.magen-fixed.*` = original file), then linked static ⇄ runtime rules on the
+same probe. The last pass catches "fixed in config, still observed live" (not
+redeployed): those **persist** and are listed in `still_observed`; they never count
+towards the remediation rate.
+
 ## Storage
 
 Tables: `targets` (allowlist + authorization timestamp), `scans` (version, commit, options),

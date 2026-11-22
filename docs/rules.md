@@ -182,6 +182,30 @@ then TLS: one verifying handshake and one each limited to TLS 1.0 / 1.1.
 | `API-RT-010` | a status path → 200 **with** its content marker (`Active connections:`, `Server Status`, `"_links"`, `PHP Version`) — SPA fallbacks don't count |
 | `API-RT-011` | the OPTIONS `Allow` header lists TRACE or TRACK (Magen never sends them) |
 
+## Remediation
+
+Deterministic auto-fixes (validated by re-parse + re-running the rules; see
+`docs/architecture.md`). Everything else gets the rule's template only, because it changes
+the API contract or needs a human decision.
+
+| Rule | Auto-fix |
+|---|---|
+| `API-OAS-001` | `http://` → `https://` on that server URL (templated schemes: template only) |
+| `API-OAS-003` | when no security is set anywhere: add root `security` with the first defined scheme (YAML) |
+| `API-OAS-005` | `in: query` → `in: header` |
+| `API-OAS-009` | remove the leaky property from the response schema (YAML) |
+| `NGX-HDR-001` | `server_tokens off` (rewrite, or add to `http`; snippets: template) |
+| `NGX-HDR-002` | add missing `nosniff` / `X-Frame-Options` (copies inherited headers) |
+| `NGX-TLS-001 / 002` | rewrite `ssl_protocols` / `ssl_ciphers` (Mozilla intermediate) |
+| `NGX-TLS-003` | add HSTS, or repair `max-age=0` (copies inherited headers) |
+| `NGX-TLS-004` | `return 301 https://$host$request_uri;` (not for servers that also serve TLS) |
+| `NGX-CFG-001 / 003` | `autoindex off` / `client_max_body_size 10m` |
+| `NGX-CFG-002` | `allow 127.0.0.1; deny all;` |
+| `NGX-RL-001` | `limit_req_zone` (or reuse an existing zone) + `limit_req` in each server |
+
+Template only: API-OAS-002, 004, 006, 007, 008, 010; NGX-CORS-001; all API-RT-* (runtime
+findings are fixed in config/code, then retested).
+
 ## Parser guarantees
 
 `backend/app/static/openapi/loader.py`: `yaml.SafeLoader` only, non-standard tags rejected,

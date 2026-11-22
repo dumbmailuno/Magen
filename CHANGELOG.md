@@ -2,6 +2,16 @@
 
 ## 0.1.0 — unreleased
 
+- **MVP (roadmap wk 9–10).** Correlation engine (static ⇄ runtime link table with host /
+  listener / path scoping; confirmed / inconclusive-by-contradiction; static ids kept),
+  correlation corpus (3 cases). Remediation: 14 deterministic fixers, difflib diffs,
+  validation (re-parse + re-run rules + optional nginx -t), `POST /api/remediation/preview`.
+  Retest: persisted sessions (hashes, not contents; migration 0002 stores recorded runtime
+  observations), baseline comparison with "still observed live" detection.
+  UI: DiffView, RemediationPanel, CompareView, Compare page, Retest flow, correlation and
+  retest summaries. Design system 0.4.0.
+- Fixed: runtime findings were tagged `source: static`; finding-list "New" markers.
+
 - Runtime analysis (roadmap wk 7–8): allowlist API (authorization confirmation + timestamp),
   safety core (host normalisation, IP validation incl. metadata block, DNS-rebinding-proof
   IP pinning, same-host redirects ≤ 3, safe methods only, global ≤ 5 req/s + per-scan rate,

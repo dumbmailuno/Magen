@@ -22,6 +22,11 @@ config under **New scan**, review results under **Findings**. Week 7–8: runtim
 allowlist a host under **Targets** (authorization required), then add a live base URL to a scan.
 Safety guarantees: [`docs/threat-model.md`](docs/threat-model.md).
 
+**MVP (week 9–10):** static and runtime evidence are correlated (confirmed / inconclusive),
+each finding can generate a validated corrected copy with a diff (never applied for you),
+and **Retest** compares against a previous session: resolved / persists / new, including
+"fixed in config but still observed live".
+
 ## Layout
 
 | Path | What |

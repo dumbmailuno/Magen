@@ -97,13 +97,29 @@ inter-rater agreement reported; (2) borderline-case analysis per rule.
 | API-RT-005, API-RT-004 | JSON-only APIs where browser headers matter less (still recommended) |
 | API-RT-008 | Signatures inside legitimate content (e.g. a docs page quoting a traceback) |
 
+### Corpus v1 (2026-11-22) — Correlation
+
+`labels.yaml → correlation:` cases pair static inputs with a recorded runtime scan and
+label the expected final `(rule_id, pointer, status, source)`.
+
+| Case | Inputs | Exercises |
+|---|---|---|
+| `agreement` | `nginx/legacy-tls.conf` + `runtime/legacy-server.json` | TLS-001, TLS-003 confirmed (correlated); TLS-002 stays potential (no runtime link); runtime-only findings kept; config says `server_tokens off` yet a version is served → runtime finding kept |
+| `contradiction` | `correlation/cdn-headers.conf` + `correlation/cdn-headers.json` | HSTS, headers and `/nginx_status` missing/open in config but provided/blocked upstream → inconclusive with contradicting evidence |
+| `different-host` | `nginx/legacy-tls.conf` + `runtime/hardened-api.json` | config for another host: no correlation at all |
+
+All three matched (status and source) after two engine bugs surfaced by the corpus were
+fixed: runtime findings were tagged `source: static`, and an unmatched host name fell back
+to a config's only server (now only IP targets use nginx's default-server semantics).
+
 ## Metrics
 
 | Metric | Definition |
 |---|---|
 | Precision / recall / F1 | Per rule and overall; match = same `rule_id` + location |
 | Correlation accuracy | Predicted vs labelled `confirmed / potential / inconclusive` |
-| Remediation success rate | Fix applied → retest marks finding *resolved* |
+| Remediation success rate | Fix applied → retest marks finding *resolved*. Static part measured on the corpus: every auto-fix validates (`test_every_applied_fix_validates`: finding gone, nothing introduced); session-level rate = resolved / (resolved + persists), with config-fixed-but-still-live findings counted as persisting |
+| Auto-fix coverage | Share of findings with a deterministic fix vs template-only (per rule, see `docs/rules.md` → Remediation) |
 | AI explanation quality | Rubric (correctness, actionability; 1–5) on a fixed sample |
 | Scan time | Wall-clock per input, median of N runs |
 
