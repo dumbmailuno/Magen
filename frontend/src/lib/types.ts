@@ -77,3 +77,46 @@ export interface Health {
   commit: string;
   generated_by: string;
 }
+
+export const SEVERITY_RANK: Record<Severity, number> = {
+  info: 0,
+  low: 1,
+  medium: 2,
+  high: 3,
+  critical: 4,
+};
+
+/** Mirror of backend app/api/meta.py RuleInfo. */
+export interface RuleInfo {
+  id: string;
+  title: string;
+  category: string;
+  severity: Severity;
+  target: "openapi" | "nginx" | "runtime";
+  description: string;
+  references: References;
+  deprecated: boolean;
+}
+
+/** Mirror of backend app/api/analyze.py OpenApiResult. */
+export interface OpenApiResult {
+  generated_by: string;
+  source_name: string;
+  openapi_version: string;
+  operation_count: number;
+  rules_run: string[];
+  findings: Finding[];
+}
+
+/** Mirror of backend app/api/analyze.py NginxResult. */
+export interface NginxResult {
+  generated_by: string;
+  source_name: string;
+  server_count: number;
+  is_snippet: boolean;
+  unresolved_includes: { path: string; line: number }[];
+  rules_run: string[];
+  findings: Finding[];
+}
+
+export type InputKind = "openapi" | "nginx";

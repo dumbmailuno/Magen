@@ -1,4 +1,4 @@
-import type { ApiErrorBody, Health } from "./types";
+import type { ApiErrorBody, Health, NginxResult, OpenApiResult, RuleInfo } from "./types";
 
 /** Error raised for any non-2xx response, carrying the backend's `{code, message}`. */
 export class ApiError extends Error {
@@ -64,6 +64,13 @@ export async function request<T>(
   return body as T;
 }
 
+const post = (body: unknown): RequestInit => ({ method: "POST", body: JSON.stringify(body) });
+
 export const api = {
   health: () => request<Health>("/api/health"),
+  rules: () => request<RuleInfo[]>("/api/rules"),
+  analyzeOpenapi: (filename: string, content: string) =>
+    request<OpenApiResult>("/api/analyze/openapi", post({ filename, content })),
+  analyzeNginx: (filename: string, content: string) =>
+    request<NginxResult>("/api/analyze/nginx", post({ filename, content })),
 };
