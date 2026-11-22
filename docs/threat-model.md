@@ -41,6 +41,7 @@ Status column: ✅ implemented · 🟡 planned (roadmap week).
 | Renderer compromise escalates to Node (E) | B5 | `contextIsolation`, `nodeIntegration: false`, `sandbox: true`; preload exposes only URL + token; navigation & `window.open` blocked; all permission requests denied; strict CSP (no remote content) | ✅ |
 | Path traversal via `app://` protocol (I) | B5 | `resolveAppPath` (pure, unit-tested incl. encoded `..`, backslashes, NUL, malformed escapes): resolved path must stay inside `frontend/dist`, else 403 | ✅ |
 | Token handed to an unexpected frame (I) | B5 | IPC handler returns config only if the sender frame URL is our own origin | ✅ |
+| Spec/config content opens arbitrary URLs via reference links (S, I) | B5 | `window.open` always denied; only `https` URLs on a fixed documentation-host allowlist (no credentials/ports) are handed to the system browser (`isAllowedExternalUrl`, unit-tested) | ✅ |
 
 ## Residual risks / limitations
 

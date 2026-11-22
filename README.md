@@ -17,7 +17,8 @@ Final-year academic project — see [`CLAUDE.md`](CLAUDE.md) for the full engine
 Roadmap week 1–2 (scaffold): finding schema, SQLite + migrations, FastAPI skeleton with
 session-token auth, Electron shell, design tokens, base components, `/dev/components`, CI.
 Roadmap week 3–4: OpenAPI parser + 10 rules (`API-OAS-001`…`010`, see
-[`docs/rules.md`](docs/rules.md)) and labelled corpus v1. Week 5–6: Nginx parser + 11 rules (`NGX-*`) and the findings UI.
+[`docs/rules.md`](docs/rules.md)) and labelled corpus v1. Week 5–6: Nginx parser + 11 rules (`NGX-*`) and the findings UI — pick a spec and/or
+config under **New scan**, review results under **Findings**.
 
 ## Layout
 
@@ -28,7 +29,7 @@ Roadmap week 3–4: OpenAPI parser + 10 rules (`API-OAS-001`…`010`, see
 | `electron/` | Main process, preload, backend process manager |
 | `docs/` | Architecture, threat model, rules, evaluation, design system |
 | `corpus/` | Labelled evaluation corpus (`labels.yaml`) |
-| `scripts/` | Design-token lint, contrast check, schema export |
+| `scripts/` | Design-token lint, contrast check, schema and UI-fixture export, Electron launcher |
 
 ## Prerequisites
 

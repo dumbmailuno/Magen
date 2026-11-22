@@ -2,6 +2,15 @@
 
 ## 0.1.0 — unreleased
 
+- Findings UI (roadmap wk 5–6): New Scan (OpenAPI + Nginx file inputs, local 5 MB check),
+  Findings page with summary strip, URL-persisted filters, keyboard listbox, finding detail
+  (evidence → why it matters → fix → references), FixCard copy/export (no apply), loading /
+  empty / error+retry / partial / coverage states. Reference links open in the system
+  browser only for allowlisted https documentation hosts.
+
+- Design system 0.2.0: FileField, SummaryStrip, FilterBar, Alert components; FindingTable
+  realised as a keyboard listbox; `split` (1100px) screen for master–detail.
+
 - Nginx static analysis (roadmap wk 5–6): text-only parser with structural pointers,
   inheritance-aware config model (incl. `add_header` all-or-nothing), 11 rules (NGX-*),
   `POST /api/analyze/nginx` (reports unresolved includes), `inconclusive` status when config
