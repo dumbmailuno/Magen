@@ -68,12 +68,19 @@ class ScanRepository:
         self.db = db
 
     def create(
-        self, *, target_id: int | None, options: dict[str, object], version: str, commit: str
+        self,
+        *,
+        target_id: int | None,
+        options: dict[str, object],
+        version: str,
+        commit: str,
+        baseline_scan_id: int | None = None,
     ) -> int:
         """Insert a running scan and return its id."""
         with self.db.session() as s:
             scan = Scan(
                 target_id=target_id,
+                baseline_scan_id=baseline_scan_id,
                 status="running",
                 started_at=_now(),
                 magen_version=version,
@@ -155,6 +162,12 @@ class ScanRepository:
                     select(ProbeAudit).where(ProbeAudit.scan_id == scan_id).order_by(ProbeAudit.id)
                 )
             )
+
+    def sessions(self) -> list[Scan]:
+        """Scan sessions, newest first."""
+        with self.db.session() as s:
+            rows = s.scalars(select(Scan).order_by(Scan.id.desc()))
+            return [r for r in rows if (r.options or {}).get("kind") == "session"]
 
     def mark_interrupted(self) -> int:
         """Scans left 'running' by a previous process are marked 'interrupted'."""
