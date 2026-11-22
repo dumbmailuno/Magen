@@ -87,6 +87,11 @@ class NginxConfig:
         #: directives (server_tokens, limit_req_zone...) are then invisible to us.
         self.is_snippet = not self.http_blocks
 
+    @property
+    def source_lines(self) -> list[str]:
+        """The original text split into lines (read-only by convention)."""
+        return self._text_lines
+
     # ---- structure ----------------------------------------------------------------
 
     def servers(self) -> list[Server]:

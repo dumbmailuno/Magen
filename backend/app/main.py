@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app import __version__
-from app.api import analyze, meta, scans, targets
+from app.api import analyze, meta, remediation, scans, targets
 from app.core.config import Settings, get_settings
 from app.core.errors import install_error_handlers
 from app.core.logging import configure_logging
@@ -57,6 +57,7 @@ def create_app(
     app.include_router(analyze.router)
     app.include_router(targets.router)
     app.include_router(scans.router)
+    app.include_router(remediation.router)
 
     # Middleware order: the last added runs first (outermost).
     app.add_middleware(SessionTokenMiddleware, token=settings.session_token.get_secret_value())

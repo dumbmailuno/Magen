@@ -78,6 +78,11 @@ class OpenApiDocument:
         self._lines: dict[str, LineRange] = loaded.lines
         self._text_lines = text.removeprefix("﻿").replace("\r\n", "\n").split("\n")
 
+    @property
+    def source_lines(self) -> list[str]:
+        """The original text split into lines (read-only by convention)."""
+        return self._text_lines
+
     # ---- pointer access -------------------------------------------------------------
 
     def get(self, pointer: str) -> Any:
