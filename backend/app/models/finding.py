@@ -94,7 +94,8 @@ class Location(_Frozen):
     file: str | None = None
     line: int | None = Field(default=None, ge=1)
     end_line: int | None = Field(default=None, ge=1)
-    #: RFC 6901 JSON pointer into an OpenAPI document, e.g. ``/paths/~1users/get``.
+    #: Structural locator. OpenAPI: RFC 6901 JSON pointer (``/paths/~1users/get``).
+    #: Nginx: directive path with per-name sibling index (``/http/0/server/1/autoindex/0``).
     pointer: str | None = None
     url: str | None = None
 
@@ -109,16 +110,26 @@ class Location(_Frozen):
         return redact_text(value) if value is not None else None
 
     def key(self) -> str:
-        """Canonical string used for hashing and sorting."""
+        """Canonical string used for sorting (includes line numbers, for reading order)."""
         return "|".join(
             [
                 self.file or "",
-                str(self.line or ""),
+                f"{self.line or 0:08d}",
                 str(self.end_line or ""),
                 self.pointer or "",
                 self.url or "",
             ]
         )
+
+    def identity_key(self) -> str:
+        """Canonical string used for finding ids.
+
+        Line numbers are excluded whenever a structural ``pointer`` exists, so editing
+        unrelated parts of a file does not change ids — retest can then tell "persists"
+        from "resolved + new". Without a pointer the line is the only locator and is kept.
+        """
+        line_part = "" if self.pointer is not None else str(self.line or "")
+        return "|".join([self.file or "", line_part, self.pointer or "", self.url or ""])
 
 
 class Evidence(_Frozen):
@@ -187,7 +198,7 @@ class Finding(_Frozen):
 def _evidence_digest(evidence: Iterable[Evidence]) -> str:
     """Hash the *stable* parts of evidence (not request/response, which carry dates etc.)."""
     canonical = sorted(
-        (e.kind.value, e.location.key(), _normalize_text(e.excerpt)) for e in evidence
+        (e.kind.value, e.location.identity_key(), _normalize_text(e.excerpt)) for e in evidence
     )
     blob = json.dumps(canonical, ensure_ascii=False, separators=(",", ":"))
     return hashlib.sha256(blob.encode()).hexdigest()
@@ -196,7 +207,7 @@ def _evidence_digest(evidence: Iterable[Evidence]) -> str:
 def compute_finding_id(rule_id: str, evidence: Iterable[Evidence]) -> str:
     """Stable finding id = hash(rule_id + normalized locations + evidence hash)."""
     items = list(evidence)
-    locations = "\n".join(sorted(e.location.key() for e in items))
+    locations = "\n".join(sorted(e.location.identity_key() for e in items))
     material = "\0".join([rule_id, locations, _evidence_digest(items)])
     return hashlib.sha256(material.encode()).hexdigest()[:FINDING_ID_LENGTH]
 

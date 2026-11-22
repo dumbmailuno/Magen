@@ -109,3 +109,16 @@ def test_minified_json_excerpt_is_the_node_not_the_file() -> None:
     f = analyze_openapi(spec, "min.json").findings[0]
     assert f.rule_id == "API-OAS-001"
     assert f.evidence[0].excerpt == '"http://x.example.com"'
+
+
+@pytest.mark.parametrize("entry", ENTRIES, ids=[e["file"] for e in ENTRIES])
+def test_ids_survive_unrelated_edits_above(entry: dict[str, Any]) -> None:
+    """Prepending comment lines shifts every line number; ids must not change."""
+    rel = entry["file"]
+    if not rel.endswith(".yaml"):
+        pytest.skip("JSON has no comments")
+    text = (CORPUS / rel).read_text(encoding="utf-8")
+    shifted = "# reviewed 2026-11-22\n# owner: platform team\n" + text
+    before = [f.id for f in _analyze(rel, text).findings]
+    after = [f.id for f in _analyze(rel, shifted).findings]
+    assert before == after

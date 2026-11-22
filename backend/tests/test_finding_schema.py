@@ -145,3 +145,44 @@ def test_committed_json_schema_is_current() -> None:
         "Finding schema changed: run `python ../scripts/export_schema.py` and update "
         "frontend/src/lib/types.ts and docs/rules.md"
     )
+
+
+def test_id_ignores_line_numbers_when_a_pointer_exists() -> None:
+    """Editing unrelated lines above a finding must not change its id (retest relies on it)."""
+
+    def ev(line: int) -> Evidence:
+        return Evidence(
+            kind=EvidenceKind.OPENAPI,
+            location=Location(file="s.yaml", line=line, end_line=line + 2, pointer="/servers/0/url"),
+            excerpt="url: http://x",
+        )
+
+    assert compute_finding_id("API-OAS-001", [ev(3)]) == compute_finding_id("API-OAS-001", [ev(40)])
+
+
+def test_id_uses_line_when_no_pointer() -> None:
+    def ev(line: int) -> Evidence:
+        return Evidence(kind=EvidenceKind.NGINX, location=Location(file="n.conf", line=line), excerpt="x")
+
+    assert compute_finding_id("NGX-CFG-001", [ev(3)]) != compute_finding_id("NGX-CFG-001", [ev(4)])
+
+
+def test_sort_orders_lines_numerically() -> None:
+    def at(line: int) -> Finding:
+        return make_finding(
+            rule_id="API-OAS-003",
+            title="t",
+            category="c",
+            severity=Severity.MEDIUM,
+            status=FindingStatus.POTENTIAL,
+            source=Source.STATIC,
+            evidence=[
+                Evidence(
+                    kind=EvidenceKind.OPENAPI,
+                    location=Location(file="s.yaml", line=line, pointer=f"/p{line}"),
+                    excerpt="x",
+                )
+            ],
+        )
+
+    assert [f.evidence[0].location.line for f in sort_findings([at(10), at(9)])] == [9, 10]
