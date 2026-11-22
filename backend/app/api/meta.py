@@ -5,12 +5,14 @@ from __future__ import annotations
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-import app.rules.openapi  # noqa: F401  (register rules so /api/rules lists them)
 from app import __version__
 from app.models.finding import References, Severity
 from app.rules.base import RuleTarget
+from app.rules.catalog import load_rules
 from app.rules.registry import registry
 from app.version import commit_hash, generated_by
+
+load_rules()  # so /api/rules lists every rule
 
 router = APIRouter(prefix="/api", tags=["meta"])
 

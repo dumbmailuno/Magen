@@ -148,3 +148,30 @@ def test_analyze_openapi_rejects_empty_content(client: TestClient) -> None:
     res = client.post("/api/analyze/openapi", json={"filename": "s.yaml", "content": ""})
     assert res.status_code == 422
     assert res.json()["code"] == "invalid_request"
+
+
+NGINX = "http { server { listen 80; autoindex on; } }"
+
+
+def test_analyze_nginx(client: TestClient) -> None:
+    res = client.post("/api/analyze/nginx", json={"filename": "nginx.conf", "content": NGINX})
+    assert res.status_code == 200
+    body = res.json()
+    assert body["server_count"] == 1 and body["is_snippet"] is False
+    assert len(body["rules_run"]) == 11
+    assert "NGX-CFG-001" in [f["rule_id"] for f in body["findings"]]
+    assert all(f["evidence"][0]["kind"] == "nginx" for f in body["findings"])
+
+
+def test_analyze_nginx_reports_unresolved_includes(client: TestClient) -> None:
+    text = "server { listen 443 ssl; include snippets/h.conf; }"
+    body = client.post("/api/analyze/nginx", json={"filename": "s.conf", "content": text}).json()
+    assert body["is_snippet"] is True
+    assert body["unresolved_includes"] == [{"path": "snippets/h.conf", "line": 1}]
+    assert {f["status"] for f in body["findings"]} == {"inconclusive"}
+
+
+def test_analyze_nginx_syntax_error_uses_error_shape(client: TestClient) -> None:
+    res = client.post("/api/analyze/nginx", json={"filename": "n.conf", "content": "http {"})
+    assert res.status_code == 422
+    assert res.json()["code"] == "invalid_nginx"
