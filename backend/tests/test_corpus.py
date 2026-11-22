@@ -13,16 +13,21 @@ from typing import Any
 import pytest
 import yaml
 
+from app.rules.catalog import load_rules
+from app.rules.registry import registry
+from app.static.nginx.analyzer import analyze_nginx
 from app.static.openapi.analyzer import analyze_openapi
 
 CORPUS = Path(__file__).resolve().parents[2] / "corpus"
 LABELS: dict[str, Any] = yaml.safe_load((CORPUS / "labels.yaml").read_text(encoding="utf-8"))
-ENTRIES: list[dict[str, Any]] = [e for e in LABELS["files"] if e["file"].startswith("openapi/")]
+ENTRIES: list[dict[str, Any]] = LABELS["files"]
+KINDS = ("openapi", "nginx")
 
 
-def _analyze(rel: str, text: str | None = None) -> Any:
+def _analyze(rel: str, text: str | None = None, name: str | None = None) -> Any:
     text = text if text is not None else (CORPUS / rel).read_text(encoding="utf-8")
-    return analyze_openapi(text, f"corpus/{rel}")
+    analyze = analyze_nginx if rel.startswith("nginx/") else analyze_openapi
+    return analyze(text, name or f"corpus/{rel}")
 
 
 def _got(rel: str) -> set[tuple[str, str]]:
@@ -30,7 +35,9 @@ def _got(rel: str) -> set[tuple[str, str]]:
 
 
 def test_every_corpus_file_is_labelled() -> None:
-    on_disk = {p.relative_to(CORPUS).as_posix() for p in (CORPUS / "openapi").iterdir()}
+    on_disk = {
+        p.relative_to(CORPUS).as_posix() for kind in KINDS for p in (CORPUS / kind).iterdir()
+    }
     assert on_disk == {e["file"] for e in ENTRIES}
 
 
@@ -52,10 +59,10 @@ def test_expected_status_matches(entry: dict[str, Any]) -> None:
         assert statuses[(e["rule_id"], e["pointer"])] == e["status"]
 
 
-def test_every_openapi_rule_has_corpus_coverage() -> None:
+def test_every_rule_has_corpus_coverage() -> None:
+    load_rules()
     covered = Counter(e["rule_id"] for entry in ENTRIES for e in entry["expected"])
-    missing = [f"API-OAS-{i:03d}" for i in range(1, 11) if not covered[f"API-OAS-{i:03d}"]]
-    assert missing == []
+    assert [r.id for r in registry.all() if not covered[r.id]] == []
 
 
 @pytest.mark.parametrize("entry", ENTRIES, ids=[e["file"] for e in ENTRIES])
@@ -65,7 +72,7 @@ def test_reproducible_across_runs_line_endings_and_separators(entry: dict[str, A
     a = _analyze(rel, text).findings
     b = _analyze(rel, text).findings
     windows_name = "corpus\\" + rel.replace("/", "\\")
-    crlf = analyze_openapi(text.replace("\n", "\r\n"), windows_name)
+    crlf = _analyze(rel, text.replace("\n", "\r\n"), windows_name)
     assert a == b
     assert [f.id for f in a] == [f.id for f in crlf.findings]
     assert [f.model_dump() for f in a] == [f.model_dump() for f in crlf.findings]
@@ -77,7 +84,7 @@ def test_every_finding_has_located_evidence() -> None:
             loc = f.evidence[0].location
             assert loc.file == f"corpus/{entry['file']}"
             assert loc.pointer is not None
-            if entry["file"].endswith(".yaml"):
+            if not entry["file"].endswith(".json"):
                 assert loc.line is not None
             assert f.evidence[0].excerpt.strip()
 
@@ -115,7 +122,7 @@ def test_minified_json_excerpt_is_the_node_not_the_file() -> None:
 def test_ids_survive_unrelated_edits_above(entry: dict[str, Any]) -> None:
     """Prepending comment lines shifts every line number; ids must not change."""
     rel = entry["file"]
-    if not rel.endswith(".yaml"):
+    if rel.endswith(".json"):
         pytest.skip("JSON has no comments")
     text = (CORPUS / rel).read_text(encoding="utf-8")
     shifted = "# reviewed 2026-11-22\n# owner: platform team\n" + text

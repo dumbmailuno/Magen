@@ -68,3 +68,54 @@ files:
       - { rule_id: API-OAS-010, pointer: /paths/~1search/get/parameters/1, status: potential }
       - { rule_id: API-OAS-010, pointer: /components/parameters/TokenParam, status: potential }
       - { rule_id: API-OAS-010, pointer: "/paths/~1reset~1{token}/parameters/0", status: potential }
+
+  # ---- Nginx (corpus v1, 2026-11-22; same procedure as above) ----------------------------
+  # Nginx pointers: directive names from the root with the index among same-named
+  # siblings, e.g. /http/0/server/0/location/1.
+
+  - file: nginx/clean-tls.conf
+    kind: clean
+    expected: []
+
+  - file: nginx/legacy-tls.conf
+    kind: vulnerable
+    expected:
+      - { rule_id: NGX-TLS-001, pointer: /http/0/server/0/ssl_protocols/0, status: potential }
+      - { rule_id: NGX-TLS-002, pointer: /http/0/server/0/ssl_ciphers/0, status: potential }
+      - { rule_id: NGX-TLS-003, pointer: /http/0/server/0, status: potential }
+
+  - file: nginx/plaintext.conf
+    kind: vulnerable
+    expected:
+      - { rule_id: NGX-TLS-004, pointer: /http/0/server/0, status: potential }
+      - { rule_id: NGX-TLS-004, pointer: /http/0/server/3, status: potential }
+
+  - file: nginx/exposure.conf
+    kind: vulnerable
+    expected:
+      - { rule_id: NGX-CFG-003, pointer: /http/0/client_max_body_size/0, status: potential }
+      - { rule_id: NGX-CFG-003, pointer: /http/0/server/0/location/5/client_max_body_size/0, status: potential }
+      - { rule_id: NGX-CFG-001, pointer: /http/0/server/0/location/0/autoindex/0, status: potential }
+      - { rule_id: NGX-CFG-002, pointer: /http/0/server/0/location/1, status: potential }
+      - { rule_id: NGX-CFG-002, pointer: /http/0/server/0/location/2, status: potential }
+
+  - file: nginx/header-inheritance.conf
+    kind: tricky
+    expected:
+      - { rule_id: NGX-TLS-003, pointer: /http/0/server/0/location/1, status: potential }
+      - { rule_id: NGX-TLS-003, pointer: /http/0/server/0/location/3, status: potential }
+      - { rule_id: NGX-HDR-002, pointer: /http/0/server/0/location/1, status: potential }
+
+  - file: nginx/cors.conf
+    kind: vulnerable
+    expected:
+      - { rule_id: NGX-CORS-001, pointer: /http/0/server/0/location/0/add_header/3, status: potential }
+      - { rule_id: NGX-CORS-001, pointer: /http/0/server/0/location/1/add_header/3, status: potential }
+
+  - file: nginx/site-snippet.conf
+    kind: tricky
+    expected:
+      - { rule_id: NGX-HDR-001, pointer: /server/0, status: inconclusive }
+      - { rule_id: NGX-TLS-003, pointer: /server/0, status: inconclusive }
+      - { rule_id: NGX-HDR-002, pointer: /server/0, status: inconclusive }
+      - { rule_id: NGX-RL-001, pointer: /server/0, status: inconclusive }
