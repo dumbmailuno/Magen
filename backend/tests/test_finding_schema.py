@@ -153,7 +153,9 @@ def test_id_ignores_line_numbers_when_a_pointer_exists() -> None:
     def ev(line: int) -> Evidence:
         return Evidence(
             kind=EvidenceKind.OPENAPI,
-            location=Location(file="s.yaml", line=line, end_line=line + 2, pointer="/servers/0/url"),
+            location=Location(
+                file="s.yaml", line=line, end_line=line + 2, pointer="/servers/0/url"
+            ),
             excerpt="url: http://x",
         )
 
@@ -162,7 +164,9 @@ def test_id_ignores_line_numbers_when_a_pointer_exists() -> None:
 
 def test_id_uses_line_when_no_pointer() -> None:
     def ev(line: int) -> Evidence:
-        return Evidence(kind=EvidenceKind.NGINX, location=Location(file="n.conf", line=line), excerpt="x")
+        return Evidence(
+            kind=EvidenceKind.NGINX, location=Location(file="n.conf", line=line), excerpt="x"
+        )
 
     assert compute_finding_id("NGX-CFG-001", [ev(3)]) != compute_finding_id("NGX-CFG-001", [ev(4)])
 
