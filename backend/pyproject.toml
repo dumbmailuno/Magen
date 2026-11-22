@@ -13,6 +13,7 @@ dependencies = [
   # Storage
   "sqlalchemy>=2.0.36,<3",
   "alembic>=1.14,<2",
+  "pyyaml>=6.0.2,<7",
 ]
 
 [dependency-groups]
@@ -22,6 +23,7 @@ dev = [
   "httpx>=0.28",          # required by FastAPI TestClient
   "ruff>=0.8",
   "mypy>=1.13",
+  "types-pyyaml>=6.0.12.20261113",
 ]
 
 [build-system]
