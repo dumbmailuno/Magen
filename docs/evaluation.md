@@ -120,7 +120,7 @@ to a config's only server (now only IP targets use nginx's default-server semant
 | Correlation accuracy | Predicted vs labelled `confirmed / potential / inconclusive` |
 | Remediation success rate | Fix applied → retest marks finding *resolved*. Static part measured on the corpus: every auto-fix validates (`test_every_applied_fix_validates`: finding gone, nothing introduced); session-level rate = resolved / (resolved + persists), with config-fixed-but-still-live findings counted as persisting |
 | Auto-fix coverage | Share of findings with a deterministic fix vs template-only (per rule, see `docs/rules.md` → Remediation) |
-| AI explanation quality | Rubric (correctness, actionability; 1–5) on a fixed sample |
+| AI explanation quality | Rubric (correctness, actionability; 1–5) on a fixed sample; every output carries model@digest + prompt version, and temperature 0.1 / seed 7 make reruns comparable. Also report schema-validity rate (first try / after retry / fallback) and AI-fix validation pass rate vs template fixes |
 | Scan time | Wall-clock per input, median of N runs |
 
 ## Ablations

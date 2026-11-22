@@ -27,6 +27,11 @@ each finding can generate a validated corrected copy with a diff (never applied 
 and **Retest** compares against a previous session: resolved / persists / new, including
 "fixed in config but still observed live".
 
+**AI (week 11–12, optional):** with [Ollama](https://ollama.com) running locally
+(`ollama pull qwen3:4b`), findings get an AI explanation and can ask for an AI fix — clearly
+labelled, validated like template fixes, and never able to change a finding. Configure or
+turn it off under **Settings**. Without Ollama everything else works unchanged.
+
 ## Layout
 
 | Path | What |

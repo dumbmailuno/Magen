@@ -126,6 +126,29 @@ same probe. The last pass catches "fixed in config, still observed live" (not
 redeployed): those **persist** and are listed in `still_observed`; they never count
 towards the remediation rate.
 
+## AI assistant (`app/ai/`) — optional
+
+Ollama on loopback only (URL validated at config and on every change; no environment
+proxy). States: `disabled` / `not_running` / `model_missing` / `downloading` / `ready`; a
+model download is only ever started by the user.
+
+```
+stored finding ─► trusted rule facts (rule id, title, description, template)
+                + untrusted title & evidence in <<<DATA nonce>>> … <<<END nonce>>> blocks
+                  (redacted, ≤1500 chars, delimiter look-alikes defanged; nonce = hash of
+                  the content, so the content cannot contain its own closing delimiter)
+          ─► /api/chat  format=JSON Schema, temperature 0.1, seed 7, think off
+          ─► Pydantic (extra fields forbidden) → retry once → deterministic fallback
+          ─► output redacted, control chars stripped
+          ─► stored ONLY in finding.ai_explanation {text, model=name@digest, prompt_version}
+```
+
+AI fixes: the model sees only the finding's own lines and returns their replacement; the
+result is applied with the same edit engine and validated by the same validator as
+template fixes (re-parse, re-run every rule, nothing new introduced, nginx -t). Only
+`remediation.ai_fix` is stored. Unvalidated suggestions are labelled and not exportable.
+Instruction-like text in scanned content raises an advisory `injection_suspected` flag.
+
 ## Storage
 
 Tables: `targets` (allowlist + authorization timestamp), `scans` (version, commit, options),

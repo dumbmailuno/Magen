@@ -2,6 +2,13 @@
 
 ## 0.1.0 — unreleased
 
+- AI assistant (roadmap wk 11–12), optional and local: Ollama client (loopback only),
+  status / settings / model download, structured explanations with retry and template
+  fallback, provenance (model@digest, prompt version), AI fix suggestions validated like
+  template fixes, prompt-injection containment and advisory detection. UI: AiExplanation,
+  AiFixPanel, AiSettings; AiPanel shows unavailability reasons and injection warnings.
+  Migration 0003 (app_settings). Design system 0.5.0.
+
 - **MVP (roadmap wk 9–10).** Correlation engine (static ⇄ runtime link table with host /
   listener / path scoping; confirmed / inconclusive-by-contradiction; static ids kept),
   correlation corpus (3 cases). Remediation: 14 deterministic fixers, difflib diffs,
