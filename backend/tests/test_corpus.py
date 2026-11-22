@@ -7,6 +7,7 @@ regardless of line endings or the platform's path separator.
 from __future__ import annotations
 
 from collections import Counter
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -15,17 +16,26 @@ import yaml
 
 from app.rules.catalog import load_rules
 from app.rules.registry import registry
+from app.runtime.recording import loads
+from app.runtime.scanner import run_runtime_rules
 from app.static.nginx.analyzer import analyze_nginx
 from app.static.openapi.analyzer import analyze_openapi
 
 CORPUS = Path(__file__).resolve().parents[2] / "corpus"
 LABELS: dict[str, Any] = yaml.safe_load((CORPUS / "labels.yaml").read_text(encoding="utf-8"))
 ENTRIES: list[dict[str, Any]] = LABELS["files"]
-KINDS = ("openapi", "nginx")
+KINDS = ("openapi", "nginx", "runtime")
+
+
+@dataclass(frozen=True)
+class _RuntimeResult:
+    findings: list[Any]
 
 
 def _analyze(rel: str, text: str | None = None, name: str | None = None) -> Any:
     text = text if text is not None else (CORPUS / rel).read_text(encoding="utf-8")
+    if rel.startswith("runtime/"):
+        return _RuntimeResult(run_runtime_rules(loads(text)))
     analyze = analyze_nginx if rel.startswith("nginx/") else analyze_openapi
     return analyze(text, name or f"corpus/{rel}")
 
@@ -68,6 +78,8 @@ def test_every_rule_has_corpus_coverage() -> None:
 @pytest.mark.parametrize("entry", ENTRIES, ids=[e["file"] for e in ENTRIES])
 def test_reproducible_across_runs_line_endings_and_separators(entry: dict[str, Any]) -> None:
     rel = entry["file"]
+    if rel.startswith("runtime/"):
+        pytest.skip("recorded observations, not a source file")
     text = (CORPUS / rel).read_text(encoding="utf-8")
     a = _analyze(rel, text).findings
     b = _analyze(rel, text).findings
@@ -79,7 +91,7 @@ def test_reproducible_across_runs_line_endings_and_separators(entry: dict[str, A
 
 
 def test_every_finding_has_located_evidence() -> None:
-    for entry in ENTRIES:
+    for entry in [e for e in ENTRIES if not e["file"].startswith("runtime/")]:
         for f in _analyze(entry["file"]).findings:
             loc = f.evidence[0].location
             assert loc.file == f"corpus/{entry['file']}"
@@ -123,9 +135,28 @@ def test_ids_survive_unrelated_edits_above(entry: dict[str, Any]) -> None:
     """Prepending comment lines shifts every line number; ids must not change."""
     rel = entry["file"]
     if rel.endswith(".json"):
-        pytest.skip("JSON has no comments")
+        pytest.skip("JSON has no comments")  # also covers recorded runtime observations
     text = (CORPUS / rel).read_text(encoding="utf-8")
     shifted = "# reviewed 2026-11-22\n# owner: platform team\n" + text
     before = [f.id for f in _analyze(rel, text).findings]
     after = [f.id for f in _analyze(rel, shifted).findings]
     assert before == after
+
+
+@pytest.mark.parametrize(
+    "entry", [e for e in ENTRIES if e["file"].startswith("runtime/")], ids=lambda e: e["file"]
+)
+def test_runtime_replay_is_deterministic_and_round_trips(entry: dict[str, Any]) -> None:
+    from app.runtime.recording import dumps
+
+    text = (CORPUS / entry["file"]).read_text(encoding="utf-8")
+    assert dumps(loads(text)) == text  # fixtures are in canonical form
+    assert run_runtime_rules(loads(text)) == run_runtime_rules(loads(text))
+
+
+def test_runtime_evidence_never_contains_withheld_bodies() -> None:
+    for entry in [e for e in ENTRIES if e["file"].startswith("runtime/")]:
+        for f in _analyze(entry["file"]).findings:
+            for ev in f.evidence:
+                assert "APP_KEY" not in (ev.response or "")
+                assert "DB_PASSWORD" not in ev.excerpt

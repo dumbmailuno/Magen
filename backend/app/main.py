@@ -10,24 +10,33 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app import __version__
-from app.api import analyze, meta
+from app.api import analyze, meta, scans, targets
 from app.core.config import Settings, get_settings
 from app.core.errors import install_error_handlers
 from app.core.logging import configure_logging
 from app.core.security import TOKEN_HEADER, SessionTokenMiddleware
+from app.runtime.scanner import ScanManager
 from app.storage.database import Database
+from app.storage.repositories import ScanRepository
 
 
-def create_app(settings: Settings | None = None) -> FastAPI:
+def create_app(
+    settings: Settings | None = None, *, scan_manager: ScanManager | None = None
+) -> FastAPI:
     """Build the app. ``settings`` defaults to environment configuration."""
     settings = settings or get_settings()
     configure_logging(settings.log_level)
     db = Database(settings.db_path)
+    manager = scan_manager or ScanManager(ScanRepository(db))
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         db.migrate()
+        ScanRepository(db).mark_interrupted()
         yield
+        for job in list(manager.jobs.values()):
+            if job.task is not None and not job.task.done():
+                job.task.cancel()
         db.dispose()
 
     app = FastAPI(
@@ -41,10 +50,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.settings = settings
     app.state.db = db
+    app.state.scans = manager
 
     install_error_handlers(app)
     app.include_router(meta.router)
     app.include_router(analyze.router)
+    app.include_router(targets.router)
+    app.include_router(scans.router)
 
     # Middleware order: the last added runs first (outermost).
     app.add_middleware(SessionTokenMiddleware, token=settings.session_token.get_secret_value())

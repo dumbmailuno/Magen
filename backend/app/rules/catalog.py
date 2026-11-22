@@ -5,7 +5,7 @@ from __future__ import annotations
 import importlib
 from typing import Final
 
-RULE_PACKAGES: Final = ("app.rules.openapi", "app.rules.nginx")
+RULE_PACKAGES: Final = ("app.rules.openapi", "app.rules.nginx", "app.rules.runtime")
 
 
 def load_rules() -> None:
