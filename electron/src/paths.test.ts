@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { join, sep } from "node:path";
 import { test } from "node:test";
-import { resolveAppPath } from "./paths";
+import { isAllowedExternalUrl, resolveAppPath } from "./paths";
 
 const root = join(process.cwd(), "frontend", "dist");
 
@@ -32,3 +32,20 @@ for (const tricky of ["/..\\..\\secret", "/%5C..%5C..%5Csecret"]) {
     assert.ok(r === null || r.startsWith(root + sep), String(r));
   });
 }
+
+test("external links: only https on allowlisted documentation hosts", () => {
+  assert.ok(isAllowedExternalUrl("https://cwe.mitre.org/data/definitions/319.html"));
+  assert.ok(isAllowedExternalUrl("https://owasp.org/API-Security/editions/2023/en/0x11-t10/"));
+  for (const bad of [
+    "http://owasp.org/",
+    "https://owasp.org.evil.example/",
+    "https://evil.example/?u=owasp.org",
+    "https://user:pw@owasp.org/",
+    "https://owasp.org:8443/",
+    "file:///etc/passwd",
+    "javascript:alert(1)",
+    "not a url",
+  ]) {
+    assert.equal(isAllowedExternalUrl(bad), false, bad);
+  }
+});

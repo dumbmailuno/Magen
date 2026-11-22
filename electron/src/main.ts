@@ -1,8 +1,8 @@
-import { app, BrowserWindow, dialog, ipcMain, net, protocol, session } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, net, protocol, session, shell } from "electron";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { startBackend, type BackendHandle } from "./backend";
-import { resolveAppPath } from "./paths";
+import { isAllowedExternalUrl, resolveAppPath } from "./paths";
 
 const APP_SCHEME = "app";
 const APP_ORIGIN = `${APP_SCHEME}://magen`;
@@ -82,7 +82,11 @@ function createWindow(): void {
   win.webContents.on("will-navigate", (event, url) => {
     if (!url.startsWith(allowedPrefix)) event.preventDefault();
   });
-  win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  // Never open app windows. Reference links to allowlisted docs go to the system browser.
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (isAllowedExternalUrl(url)) void shell.openExternal(url);
+    return { action: "deny" };
+  });
 
   void win.loadURL(isDev ? DEV_URL : `${APP_ORIGIN}/index.html`);
 }
