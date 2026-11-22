@@ -1,3 +1,70 @@
-# Ground truth for the evaluation corpus. Format: see docs/evaluation.md.
-# Entries are added alongside each rule (roadmap week 3+).
-[]
+# Ground truth for the evaluation corpus (format: docs/evaluation.md).
+#
+# Labelling procedure (corpus v1, 2026-11-22): each file was written to exercise specific
+# rules; expected findings were authored from the rule definitions in docs/rules.md BEFORE
+# running the analyzer. A match is (rule_id, location.pointer). `borderline: true` marks
+# findings that are correct per the rule's definition but a human might reasonably accept
+# (known false-positive sources, see docs/evaluation.md).
+#
+# Corpus v1 doubles as the development set the rules were written against, so scores on it
+# measure regressions, not generalisation. A held-out set is planned (docs/evaluation.md).
+
+version: 1
+files:
+  - file: openapi/clean-bearer.yaml
+    kind: clean
+    expected: []
+
+  - file: openapi/clean.json
+    kind: clean
+    expected: []
+
+  - file: openapi/tricky-refs.yaml
+    kind: tricky
+    expected: []
+
+  - file: openapi/insecure-transport.yaml
+    kind: vulnerable
+    expected:
+      - { rule_id: API-OAS-001, pointer: /servers/1/url, status: potential }
+      - { rule_id: API-OAS-001, pointer: /servers/3/url, status: potential }
+      - { rule_id: API-OAS-001, pointer: /paths/~1users/servers/0/url, status: potential }
+
+  - file: openapi/no-auth.yaml
+    kind: vulnerable
+    expected:
+      - { rule_id: API-OAS-002, pointer: /openapi, status: potential }
+      - { rule_id: API-OAS-003, pointer: /paths/~1orders/get, status: potential }
+      - { rule_id: API-OAS-003, pointer: /paths/~1orders/post, status: potential }
+      - { rule_id: API-OAS-003, pointer: "/paths/~1orders~1{id}/delete", status: potential }
+      - { rule_id: API-OAS-008, pointer: /paths, status: potential }
+
+  - file: openapi/weak-schemes.yaml
+    kind: vulnerable
+    expected:
+      - { rule_id: API-OAS-004, pointer: /components/securitySchemes/basicAuth, status: potential }
+      - { rule_id: API-OAS-005, pointer: /components/securitySchemes/queryKey, status: potential }
+      - { rule_id: API-OAS-006, pointer: /components/securitySchemes/oauth/flows/implicit, status: potential }
+      - { rule_id: API-OAS-006, pointer: /components/securitySchemes/oauth/flows/password, status: potential }
+      - { rule_id: API-OAS-007, pointer: /security/1/bearerAuth, status: potential }
+      - { rule_id: API-OAS-007, pointer: /paths/~1me/get/security/1/BasicAuth, status: potential }
+
+  - file: openapi/public-endpoints.yaml
+    kind: tricky
+    expected:
+      - { rule_id: API-OAS-003, pointer: /paths/~1health/get/security, status: potential, borderline: true }
+      - { rule_id: API-OAS-003, pointer: /paths/~1login/post/security, status: potential, borderline: true }
+      - { rule_id: API-OAS-003, pointer: /paths/~1catalog/get/security, status: potential }
+
+  - file: openapi/leaky-errors.yaml
+    kind: vulnerable
+    expected:
+      - { rule_id: API-OAS-009, pointer: /components/schemas/Error/properties/stackTrace, status: potential }
+      - { rule_id: API-OAS-009, pointer: /components/schemas/Debug/properties/exception, status: potential }
+
+  - file: openapi/credentials-in-query.yaml
+    kind: vulnerable
+    expected:
+      - { rule_id: API-OAS-010, pointer: /paths/~1search/get/parameters/1, status: potential }
+      - { rule_id: API-OAS-010, pointer: /components/parameters/TokenParam, status: potential }
+      - { rule_id: API-OAS-010, pointer: "/paths/~1reset~1{token}/parameters/0", status: potential }

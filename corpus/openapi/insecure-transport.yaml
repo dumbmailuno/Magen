@@ -1,0 +1,33 @@
+# API-OAS-001: plain-HTTP servers at root, templated-scheme and path-item level.
+openapi: 3.0.3
+info:
+  title: Insecure transport
+  version: "1.0"
+servers:
+  - url: https://api.example.com/v1
+  - url: http://api.example.com/v1
+  - url: http://localhost:8080
+  - url: "{scheme}://staging.example.com"
+    variables:
+      scheme:
+        default: https
+        enum:
+          - https
+          - http
+security:
+  - bearerAuth: []
+paths:
+  /users:
+    servers:
+      - url: http://users.example.com
+    get:
+      responses:
+        "200":
+          description: OK
+        "429":
+          description: Too many requests
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

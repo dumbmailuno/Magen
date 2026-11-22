@@ -1,0 +1,28 @@
+# API-OAS-002/003/008: no security at all and no rate-limit documentation.
+openapi: 3.1.0
+info:
+  title: Orders without auth
+  version: "1.0"
+servers:
+  - url: https://orders.example.com
+paths:
+  /orders:
+    get:
+      responses:
+        "200":
+          description: OK
+    post:
+      responses:
+        "201":
+          description: Created
+  /orders/{id}:
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted

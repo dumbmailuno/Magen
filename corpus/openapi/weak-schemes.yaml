@@ -1,0 +1,51 @@
+# API-OAS-004/005/006/007: weak or broken security scheme configuration.
+openapi: 3.0.3
+info:
+  title: Weak schemes
+  version: "1.0"
+servers:
+  - url: https://api.example.com
+security:
+  - basicAuth: []
+  - bearerAuth: [] # not defined below
+paths:
+  /me:
+    get:
+      security:
+        - oauth:
+            - read
+        - BasicAuth: [] # names are case-sensitive: undefined
+      responses:
+        "200":
+          description: OK
+        "429":
+          description: Too many requests
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: Basic
+    queryKey:
+      type: apiKey
+      in: query
+      name: api_key
+    headerKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://auth.example.com/authorize
+          scopes:
+            read: Read access
+        password:
+          tokenUrl: https://auth.example.com/token
+          scopes:
+            read: Read access
+        authorizationCode:
+          authorizationUrl: https://auth.example.com/authorize
+          tokenUrl: https://auth.example.com/token
+          scopes:
+            read: Read access

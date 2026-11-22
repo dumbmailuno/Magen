@@ -1,0 +1,57 @@
+# Clean: TLS-only server, bearer auth required globally, rate limits documented.
+openapi: 3.0.3
+info:
+  title: Clean bearer API
+  version: "1.0"
+servers:
+  - url: https://api.example.com/v1
+  - url: http://localhost:8080 # local development server (loopback is not flagged)
+security:
+  - bearerAuth: []
+paths:
+  /users:
+    get:
+      summary: List users
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            RateLimit-Remaining:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    TooManyRequests:
+      description: Too many requests
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        traceId:
+          type: string

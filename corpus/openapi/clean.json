@@ -1,0 +1,21 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Clean JSON API", "version": "1.0" },
+  "servers": [{ "url": "https://api.example.com" }],
+  "security": [{ "apiKey": [] }],
+  "paths": {
+    "/widgets": {
+      "get": {
+        "responses": {
+          "200": { "description": "OK" },
+          "429": { "description": "Too many requests" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKey": { "type": "apiKey", "in": "header", "name": "X-API-Key" }
+    }
+  }
+}
